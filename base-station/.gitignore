@@ -1,0 +1,10 @@
+**/squareline/backup/**
+**/squareline/autosave/**
+components/lvgl/**
+managed_components/**
+managed_components/
+dependencies.lock
+partitions.csv
+build/**
+build/*
+build/
