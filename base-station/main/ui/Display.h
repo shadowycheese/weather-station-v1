@@ -13,11 +13,6 @@ class MyDisplay
             _label.text(text);
         }
 
-        // inline lv_obj_t *screen()
-        //{
-        //   return _parent;
-        //}
-
     private:
         lv::Label _label;
 

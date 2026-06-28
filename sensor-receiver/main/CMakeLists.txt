@@ -1,7 +1,7 @@
-list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../../shared_components")
+list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../../shared-components")
 
 idf_component_register(SRCS "main.cpp" 
-                            "../../shared_components/models/src/models.c"
+                            "../../shared-components/core/src/radio.c"
                     INCLUDE_DIRS "."
-                            "../../shared_components/models/include"
+                            "../../shared-components/core/include"
                     PRIV_REQUIRES nvs_flash ieee802154)

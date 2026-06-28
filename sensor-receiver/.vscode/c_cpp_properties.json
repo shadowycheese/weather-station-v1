@@ -8,13 +8,13 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/home/alan/.espressif/v5.5.4/esp-idf/components/**",
-                "${workspaceFolder}/../shared_components/**"
+                "${workspaceFolder}/../shared-components/**"
             ],
             "browse": {
                 "path": [
                     "${workspaceFolder}",
                     "/home/alan/.espressif/v5.5.4/esp-idf/components",
-                    "${workspaceFolder}/../shared_components"
+                    "${workspaceFolder}/../shared-components"
                 ],
                 "limitSymbolsToIncludedHeaders": false
             },

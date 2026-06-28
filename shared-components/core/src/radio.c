@@ -1,4 +1,5 @@
 #include "models.h"
+#include "radio.h"
 #include "esp_ieee802154.h" // Native 15.4 low-level radio controller
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

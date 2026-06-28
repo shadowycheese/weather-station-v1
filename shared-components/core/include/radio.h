@@ -1,5 +1,5 @@
-#ifndef MODELS_H
-#define MODELS_H
+#ifndef RADIO_H
+#define RADIO_H
 
 #include <stdint.h>
 
@@ -17,15 +17,6 @@
 #else
 #include <string.h> // Pulled when models.c reads this file
 #endif
-
-typedef struct
-{
-    uint16_t node_id;
-    float reading1;
-    float reading2;
-    float reading3;
-    uint16_t battery_mv;
-} __attribute__((packed)) sensor_data_t;
 
 #ifdef __cplusplus
 extern "C"

@@ -5,6 +5,7 @@
 #include "nvs_flash.h"
 #include "esp_ieee802154.h"
 #include "models.h"
+#include "radio.h"
 
 extern "C"
 {
