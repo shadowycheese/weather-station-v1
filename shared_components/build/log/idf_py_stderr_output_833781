@@ -1,0 +1,11 @@
+Command: cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/home/alan/.espressif/python_env/idf5.5_py3.12_env/bin/python -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 /home/alan/projects/weather-station/weather-station-v1/shared_components
+CMake Error at /home/alan/.espressif/v5.5.4/esp-idf/tools/cmake/project.cmake:514 (message):
+  MINIMAL_BUILD is enabled but component main was not found.  Please ensure
+  the main component exists (in
+  '/home/alan/projects/weather-station/weather-station-v1/shared_components/main')
+  or disable MINIMAL_BUILD, or explicitly set the COMPONENTS variable.
+Call Stack (most recent call first):
+  /home/alan/.espressif/v5.5.4/esp-idf/tools/cmake/project.cmake:586 (__project_init)
+  CMakeLists.txt:8 (project)
+
+

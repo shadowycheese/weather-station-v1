@@ -1,18 +1,27 @@
-#ifndef Display_h
-#define Display_h
+#ifndef MyDisplay_h
+#define MyDisplay_h
 
-class Display
+#include "lv.hpp"
+
+class MyDisplay
 {
     public:
         void start();
 
-        inline lv_obj_t *screen()
+        void setText(char *text)
         {
-            return _parent;
+            _label.text(text);
         }
 
+        // inline lv_obj_t *screen()
+        //{
+        //   return _parent;
+        //}
+
     private:
-        lv_obj_t *_parent;
+        lv::Label _label;
+
+        void create_cpp20_ui();
 };
 
 #endif

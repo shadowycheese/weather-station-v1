@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "ESP-IDF",
+            "compilerPath": "/home/alan/.espressif/tools/riscv32-esp-elf/esp-14.2.0_20260121/riscv32-esp-elf/bin/riscv32-esp-elf-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/alan/.espressif/v5.5.4/esp-idf/components/**",
+                "${workspaceFolder}/../shared_components/**"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/home/alan/.espressif/v5.5.4/esp-idf/components",
+                    "${workspaceFolder}/../shared_components"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "intelliSenseMode": "linux-gcc-arm",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

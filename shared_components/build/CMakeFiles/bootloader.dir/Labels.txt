@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/CMakeFiles/bootloader
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/CMakeFiles/bootloader.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/CMakeFiles/bootloader-complete.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/alan/projects/weather-station/weather-station-v1/shared_components/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
