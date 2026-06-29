@@ -5,14 +5,14 @@
     "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/**",
-        "${workspaceFolder}/../shared_components/models/include"
+        "${workspaceFolder}/../shared-components/models/include"
     ],
     "C_Cpp.default.browse.path": [
         "${workspaceFolder}",
-        "${workspaceFolder}/../shared_components/models"
+        "${workspaceFolder}/../shared-components/models"
     ],
     "espIdf.customExtraComponents": [
-        "${workspaceFolder}/../shared_components"
+        "${workspaceFolder}/../shared-components"
     ],
     "editor.suggest.showInterfaces": true,
     "editor.suggest.showProperties": true,

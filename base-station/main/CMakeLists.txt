@@ -5,8 +5,13 @@ idf_component_register(
     SRCS 
         ${LV_DEMOS_SOURCES}
         main.cpp 
-        ui/Display.cpp
+        ui/display.cpp
+        ui/edt.cpp
+        io/sensor.cpp
+        ../../shared-components/core/src/espio.c
+        ../../shared-components/core/src/espspi.c
     INCLUDE_DIRS 
+        ../../shared-components/core/include
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/ui
         ${LV_DEMO_DIR})

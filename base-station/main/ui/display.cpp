@@ -1,5 +1,5 @@
 #include "bsp/display.h"
-#include "Display.h"
+#include "display.h"
 #include "bsp/esp-bsp.h"
 #include "bsp_board_extra.h"
 #include "esp_check.h"
@@ -14,7 +14,7 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
-void MyDisplay::start()
+void Display::start()
 {
     static bsp_display_cfg_t cfg = {
         .lv_adapter_cfg = ESP_LV_ADAPTER_DEFAULT_CONFIG(),
@@ -37,7 +37,7 @@ void MyDisplay::start()
 
 lv::Button *my_button_ptr = nullptr;
 
-void MyDisplay::create_cpp20_ui()
+void Display::create_cpp20_ui()
 {
     auto active_screen = lv::screen_active();
 
@@ -54,4 +54,11 @@ void MyDisplay::create_cpp20_ui()
                                }));
 
     _label = lv::Label::create(*my_button_ptr).text("Click Me").center();
+}
+
+void Display::setText(char *text)
+{
+    _label.text(text);
+
+    _label.invalidate();
 }

@@ -6,19 +6,28 @@
 #include "esp_lcd_touch.h"
 #include "esp_log.h"
 #include "esp_memory_utils.h"
+#include "espio.h"
+#include "espspi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lv_demos.h"
 #include "lvgl.h"
+#include "models.h"
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "ui/Display.h"
+#include "ui/display.h"
+#include "ui/edt.h"
+#include "io/sensor.h"
 
-MyDisplay display;
+Display display;
 
 extern "C" void app_main(void)
 {
-    printf("Calling Display::init()");
+    gpio_install_isr_service(0);
+
+    edt_init(&display);
 
     display.start();
+
+    sensor_read_start();
 }
