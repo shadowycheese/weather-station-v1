@@ -17,20 +17,35 @@ extern "C"
         xQueueSend(_edt_job_queue, &job, portMAX_DELAY);
     }
 
-    void process_sensor_data(sensor_data_t *sensorData)
+    void process_sensor_data(sensor_data_t *sensor_data)
     {
-        char buffer[128];
+        char buffer1[128];
+        char buffer2[128];
+        char buffer3[128];
 
         printf("P4: %d: %0.2f %0.2f %0.2f (Bat. %d)\n",
-               sensorData->node_id,
-               sensorData->reading1,
-               sensorData->reading2,
-               sensorData->reading3,
-               sensorData->battery_mv);
+               sensor_data->sensor_id,
+               sensor_data->reading1,
+               sensor_data->reading2,
+               sensor_data->reading3,
+               sensor_data->battery_mv);
 
-        sprintf(buffer, "%0.2f", sensorData->reading1);
+        if (sensor_data->sensor_id == 4)
+        {
+            sprintf(buffer1, "UV: %0.2f", sensor_data->reading1);
 
-        _display->setText(buffer);
+            _display->setValues(0, 0, 0, buffer1);
+        }
+        else
+        {
+            sprintf(buffer1, "Temp %0.2fC", sensor_data->reading1);
+
+            sprintf(buffer2, "Humidity: %0.2f%", sensor_data->reading2);
+
+            sprintf(buffer3, "Pressure: %0.2fhPa", sensor_data->reading3);
+
+            _display->setValues(buffer1, buffer2, buffer3, 0);
+        }
     }
 
     void edit_task(void *pvParameters)

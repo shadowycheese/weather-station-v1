@@ -13,6 +13,9 @@
 #include "lvgl.h"
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "esp_wifi.h"
+#include "esp_netif.h"
+#include "esp_sntp.h"
 
 void Display::start()
 {
@@ -30,35 +33,62 @@ void Display::start()
 
     bsp_display_lock(-1);
 
-    create_cpp20_ui();
+    create_boot_io();
 
     bsp_display_unlock();
 }
 
 lv::Button *my_button_ptr = nullptr;
 
-void Display::create_cpp20_ui()
+void Display::create_boot_io()
 {
     auto active_screen = lv::screen_active();
 
     // Allocate on the heap so the event handler stays alive in memory
-    my_button_ptr =
-        new lv::Button(lv::Button::create(active_screen)
-                           .size(150, 100)
-                           .center()
-                           .on(LV_EVENT_CLICKED,
-                               [](lv_event_t *e)
-                               {
-                                   printf("Button clicked! Triggering action "
-                                          "inside C++ lambda...\n");
-                               }));
+    auto root = lv::vbox(active_screen)
+                    .fill()           // Fill the entire parent screen
+                    .center_content() // Center items horizontally and vertically
+                    .gap(20);         // Add 20px of vertical space between each label
 
-    _label = lv::Label::create(*my_button_ptr).text("Click Me").center();
+    // 2. Add 4 large labels to the root layout container
+    // Note: LVGL 9 utilizes the default system font scales (e.g., large/large)
+    _labelTemp = lv::Label::create(root)
+                     .text("Sensor Reading 1")
+                     .font(&lv_font_montserrat_26) // Use a large built-in font size
+                     .center();
+
+    _labelHumidity = lv::Label::create(root)
+                         .text("Sensor Reading 2")
+                         .font(&lv_font_montserrat_26)
+                         .center();
+
+    _labelPressure = lv::Label::create(root)
+                         .text("Sensor Reading 3")
+                         .font(&lv_font_montserrat_26)
+                         .center();
+
+    _labelUV = lv::Label::create(root)
+                   .text("Battery Level")
+                   .font(&lv_font_montserrat_26)
+                   .center();
 }
 
-void Display::setText(char *text)
+void Display::setValues(char *temp, char *hum, char *pres, char *uv)
 {
-    _label.text(text);
-
-    _label.invalidate();
+    if (temp)
+    {
+        _labelTemp.text(temp);
+    }
+    if (hum)
+    {
+        _labelHumidity.text(hum);
+    }
+    if (pres)
+    {
+        _labelPressure.text(pres);
+    }
+    if (uv)
+    {
+        _labelUV.text(uv);
+    }
 }

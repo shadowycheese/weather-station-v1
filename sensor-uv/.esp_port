@@ -1,0 +1,1 @@
+export ESP_PORT=/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_74:4D:BD:68:64:1D-if00

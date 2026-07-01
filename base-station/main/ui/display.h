@@ -8,12 +8,20 @@ class Display
 public:
     void start();
 
-    void setText(char *text);
+    void set_boot_status(char *status);
+
+    void set_boot_complete();
+
+    void setValues(char *temp, char *hum, char *pres, char *uv);
 
 private:
-    lv::Label _label;
+    lv::Label _labelTemp;
+    lv::Label _labelHumidity;
+    lv::Label _labelPressure;
+    lv::Label _labelUV;
+    lv::Label _labelBoot;
 
-    void create_cpp20_ui();
+    void create_boot_io();
 };
 
 #endif

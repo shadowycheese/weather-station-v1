@@ -8,3 +8,4 @@ partitions.csv
 build/**
 build/*
 build/
+main/passwords.h

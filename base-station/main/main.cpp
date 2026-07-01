@@ -17,17 +17,24 @@
 #include "nvs_flash.h"
 #include "ui/display.h"
 #include "ui/edt.h"
-#include "io/sensor.h"
+#include "data/sensor.h"
+#include "data/db.h"
+#include "net/network.h"
 
 Display display;
+Db data;
 
 extern "C" void app_main(void)
 {
+    nvs_flash_init();
+
+    wifi_init();
+
     gpio_install_isr_service(0);
 
     edt_init(&display);
 
     display.start();
 
-    sensor_read_start();
+    // sensor_read_start(&data);
 }

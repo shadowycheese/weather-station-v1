@@ -1,8 +1,9 @@
-#include "io/sensor.h"
+#include "data/sensor.h"
 #include "ui/edt.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "espio.h"
+#include "data/db.h"
 
 static spi_device_handle_t _spi_handle = NULL;
 
@@ -24,6 +25,7 @@ typedef struct
 
 static QueueHandle_t _sensor_job_queue = NULL;
 static TaskHandle_t _sensor_task_handle;
+static Db *_db;
 DMA_ATTR static uint8_t _spi_rx_buffer[128];
 
 void sensor_spi_isr(void *_)
@@ -64,6 +66,8 @@ void spi_read()
     {
         memcpy(&job.payload.sensor_data, _spi_rx_buffer, sizeof(sensor_data_t));
 
+        _db->update(job.payload.sensor_data);
+
         edt_post(job);
     }
 }
@@ -89,8 +93,10 @@ void spi_task(void *pvParameters)
 
 extern "C"
 {
-    void sensor_read_start()
+    void sensor_read_start(Db *db)
     {
+        _db = db;
+
         _spi_handle = init_spi_master(SPI2_HOST,
                                       GPIO_MOSI,
                                       GPIO_MISO,
