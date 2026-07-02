@@ -1,5 +1,5 @@
-#ifndef Sensor_h
-#define Sensor_h
+#ifndef Remote_Sensor_h
+#define Remote_Sensor_h
 
 #include "espspi.h"
 #include "data/db.h"
@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-    extern void sensor_read_start(Db *db);
+    extern void remote_sensor_read_start();
 
 #ifdef __cplusplus
 }

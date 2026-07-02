@@ -79,16 +79,16 @@ void esp_ieee802154_receive_done(uint8_t *frame, esp_ieee802154_frame_info_t *fr
     esp_ieee802154_receive_handle_done(frame);
 }
 
-void handleSensorData(sensor_data_t *sensorData)
+void handleSensorData(sensor_data_t *sensor_data)
 {
     printf("RX: %d: %0.2f %0.2f %0.2f (Bat. %d)\n",
-           sensorData->node_id,
-           sensorData->reading1,
-           sensorData->reading2,
-           sensorData->reading3,
-           sensorData->battery_mv);
+           sensor_data->sensor_id,
+           sensor_data->reading1,
+           sensor_data->reading2,
+           sensor_data->reading3,
+           sensor_data->battery_mv);
 
-    send_data_to_master(SPI2_HOST, GPIO_HANDSHAKE, (uint8_t *)sensorData, sizeof(sensor_data_t));
+    send_data_to_master(SPI2_HOST, GPIO_HANDSHAKE, (uint8_t *)sensor_data, sizeof(sensor_data_t));
 }
 
 extern "C" void app_main(void)

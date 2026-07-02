@@ -8,6 +8,7 @@
 #include "nvs_flash.h"
 #include "driver/i2c.h"
 #include "espio.h"
+#include "espi2c.h"
 #include "radio.h"
 #include "utils.h"
 
@@ -86,13 +87,13 @@ extern "C" void app_main(void)
 
     vTaskDelay(pdMS_TO_TICKS(25));
 
-    sensor_data_t sensorData;
+    sensor_data_t sensor_data;
 
     float temperature = 0.0;
     float humidity = 0.0;
     float pressure = 0.0;
 
-    sensorData.node_id = NET_H2_SENSOR_TEMP_1;
+    sensor_data.sensor_id = SENSOR_TEMP_OUTSIDE1;
 
     for (;;)
     {
@@ -100,11 +101,11 @@ extern "C" void app_main(void)
             bme280_read_humidity(bme280, &humidity) == ESP_OK &&
             bme280_read_pressure(bme280, &pressure) == ESP_OK)
         {
-            sensorData.reading1 = temperature;
-            sensorData.reading2 = humidity;
-            sensorData.reading3 = pressure;
+            sensor_data.reading1 = temperature;
+            sensor_data.reading2 = humidity;
+            sensor_data.reading3 = pressure;
 
-            ieee_802154_transmit_sensor_data(&sensorData);
+            ieee_802154_transmit_sensor_data(SENSOR_TEMP_OUTSIDE1, &sensor_data);
 
             vTaskDelay(pdMS_TO_TICKS(20));
 

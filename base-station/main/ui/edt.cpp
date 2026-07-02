@@ -4,6 +4,7 @@
 #include "bsp/display.h"
 #include "bsp/esp-bsp.h"
 #include "bsp_board_extra.h"
+#include "edt.h"
 
 static QueueHandle_t _edt_job_queue = NULL;
 static Display *_display;
@@ -48,7 +49,7 @@ extern "C"
         }
     }
 
-    void edit_task(void *pvParameters)
+    void edt_task(void *pvParameters)
     {
         edt_job_t job;
 
@@ -83,6 +84,6 @@ extern "C"
 
         _edt_job_queue = xQueueCreate(256, sizeof(edt_job_t));
 
-        xTaskCreatePinnedToCore(edit_task, "edt_ui_task", 8192, NULL, 2, NULL, 1);
+        xTaskCreatePinnedToCore(edt_task, "edt_ui_task", 8192, NULL, 2, NULL, 1);
     }
 }

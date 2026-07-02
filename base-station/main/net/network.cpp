@@ -11,43 +11,52 @@
 #include "esp_wifi.h"
 #include "esp_netif.h"
 #include "esp_sntp.h"
+#include "models.h"
 #include "../passwords.h"
+#include "log/log.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 
-static const char *TAG = "ESP32_P4_NTP";
-static EventGroupHandle_t s_wifi_event_group;
+static const char *TAG = "WIFI";
+static EventGroupHandle_t _wifi_event_group;
 
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
+        app_log(LOG_INFO, TAG, "Starting connection process");
+
         esp_wifi_connect();
     }
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
         esp_wifi_connect();
 
-        ESP_LOGI(TAG, "Retrying connection to AP...");
+        app_log(LOG_INFO, TAG, "Connecting to AP");
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
 
-        ESP_LOGI(TAG, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
+        app_log(LOG_INFO, TAG, "Connected: %d.%d.%d.%d", IP2STR(&event->ip_info.ip));
 
-        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        xEventGroupSetBits(_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
 
 void wifi_init_sta(void)
 {
-    s_wifi_event_group = xEventGroupCreate();
+    _wifi_event_group = xEventGroupCreate();
+
+    app_log(LOG_INFO, TAG, "Initializing network interface");
     ESP_ERROR_CHECK(esp_netif_init());
+    app_log(LOG_INFO, TAG, "Creating network event loop");
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+    app_log(LOG_INFO, TAG, "Creating WIFI STA");
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    app_log(LOG_INFO, TAG, "Initializing WIFI");
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     esp_event_handler_instance_t instance_any_id;
@@ -61,18 +70,21 @@ void wifi_init_sta(void)
             .password = WIFI_PASSPHRASE,
         },
     };
+
+    app_log(LOG_INFO, TAG, "Configuring WIFI");
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    app_log(LOG_INFO, TAG, "Starting WIFI");
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "Waiting for Wi-Fi connection...");
-    xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    ESP_LOGI(TAG, "Wi-Fi Connected successfully.");
+    app_log(LOG_INFO, TAG, "Waiting for Wi-Fi connection...");
+    xEventGroupWaitBits(_wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    app_log(LOG_INFO, TAG, "Wi-Fi Connected successfully.");
 }
 
 void initialize_sntp(void)
 {
-    ESP_LOGI(TAG, "Initializing SNTP...");
+    app_log(LOG_INFO, TAG, "Initializing SNTP...");
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, "pool.ntp.org");
     esp_sntp_init();
@@ -88,9 +100,10 @@ extern "C"
 
         int retry = 0;
         const int retry_count = 10;
+
         while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET && ++retry <= retry_count)
         {
-            ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+            app_log(LOG_INFO, TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
 
@@ -101,6 +114,6 @@ extern "C"
         time(&now);
         localtime_r(&now, &timeinfo);
         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-        ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+        app_log(LOG_INFO, TAG, "The current date/time is: %s", strftime_buf);
     }
 }

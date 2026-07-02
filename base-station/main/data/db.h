@@ -38,16 +38,22 @@ public:
         return _latest[sensor_id][data_type];
     }
 
-    void update(sensor_data_t sensor_data);
+    void init();
+
+    static void handle_sensor_data(sensor_data_t sensor_data);
 
 private:
-    timeseries_data_t to_time_series_data(sensor_data_t sensor_data, data_type_t data_type, float value);
+    void update(sensor_data_t *sensor_data);
+
+    timeseries_data_t to_time_series_data(sensor_data_t *sensor_data, data_type_t data_type, float value);
 
     timeseries_data_t _latest[SENSOR_COUNT][DATA_MAX];
     timeseries_data_t *_unbucketed;
     timeseries_data_t *_24_hours;
     timeseries_data_t *_7_days;
     timeseries_data_t *_90_days;
+
+    static Db *_instance;
 };
 
 #endif

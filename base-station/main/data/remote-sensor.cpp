@@ -1,9 +1,11 @@
-#include "data/sensor.h"
+#include "data/remote-sensor.h"
 #include "ui/edt.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "espio.h"
 #include "data/db.h"
+
+static const char *TAG = "REMOTE-SENSOR";
 
 static spi_device_handle_t _spi_handle = NULL;
 
@@ -25,7 +27,7 @@ typedef struct
 
 static QueueHandle_t _sensor_job_queue = NULL;
 static TaskHandle_t _sensor_task_handle;
-static Db *_db;
+
 DMA_ATTR static uint8_t _spi_rx_buffer[128];
 
 void sensor_spi_isr(void *_)
@@ -39,7 +41,7 @@ void sensor_spi_isr(void *_)
 
     job.type = REMOTE_SENSOR_DATA;
 
-    BaseType_t task_awake = NULL;
+    BaseType_t task_awake;
 
     xQueueSendToBackFromISR(_sensor_job_queue, &job, &task_awake);
 
@@ -66,7 +68,7 @@ void spi_read()
     {
         memcpy(&job.payload.sensor_data, _spi_rx_buffer, sizeof(sensor_data_t));
 
-        _db->update(job.payload.sensor_data);
+        Db::handle_sensor_data(job.payload.sensor_data);
 
         edt_post(job);
     }
@@ -93,10 +95,8 @@ void spi_task(void *pvParameters)
 
 extern "C"
 {
-    void sensor_read_start(Db *db)
+    void remote_sensor_read_start()
     {
-        _db = db;
-
         _spi_handle = init_spi_master(SPI2_HOST,
                                       GPIO_MOSI,
                                       GPIO_MISO,
@@ -106,7 +106,9 @@ extern "C"
 
         _sensor_job_queue = xQueueCreate(256, sizeof(sensor_job_t));
 
-        xTaskCreatePinnedToCore(spi_task, "spi_task", 4096, NULL, 3, &_sensor_task_handle, 0);
+        app_log(LOG_INFO, TAG, "Starting remote sensor receiver task");
+
+        xTaskCreatePinnedToCore(spi_task, "remote_sensors", 4096, NULL, 3, &_sensor_task_handle, 0);
 
         configure_input_pin(GPIO_HANDSHAKE, GPIO_INTR_POSEDGE);
 

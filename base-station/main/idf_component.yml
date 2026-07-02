@@ -1,11 +1,15 @@
 ## IDF Component Manager Manifest File
 dependencies:
   lvgl/lvgl:
-    version: "^9.*"
+    version: ^9.*
     public: true
-  
+
   waveshare/esp_lcd_ili9881c:
-    version: "^1.0.1"
+    version: ^1.0.1
 
   espressif/esp_wifi_remote:
-    version: "^0.14.0"
+    version: ^0.14.0
+
+  espressif/bme280: ^0.1.1
+  
+  chiehmin/sgp30: ^1.0.0

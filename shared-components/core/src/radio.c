@@ -8,7 +8,7 @@ const uint8_t NET_P4_MAC[6] = {0x80, 0xF1, 0xB2, 0xD2, 0xBC, 0x93};
 const uint8_t NET_H2_RECEIVER_MAC[6] = {0x74, 0x4D, 0xBD, 0x68, 0x63, 0xA8};
 const uint8_t NET_H2_SENSOR_TEMP_1_MAC[6] = {0x74, 0x4D, 0xBD, 0x68, 0x5C, 0x33};
 
-int ieee_802154_transmit_sensor_data(uint16_t source, sensor_data_t *sensorData)
+int ieee_802154_transmit_sensor_data(sensor_id_t sensor_id, sensor_data_t *sensor_data)
 {
     ESP_ERROR_CHECK(esp_ieee802154_enable());
     ESP_ERROR_CHECK(esp_ieee802154_set_channel(NET_H2_SENSOR_CHANNEL));
@@ -25,10 +25,10 @@ int ieee_802154_transmit_sensor_data(uint16_t source, sensor_data_t *sensorData)
 
     frame[idx++] = NET_H2_SENSOR_PAN_ID & 0xFF;
     frame[idx++] = (NET_H2_SENSOR_PAN_ID >> 8) & 0xFF;
-    frame[idx++] = source & 0xFF;
-    frame[idx++] = (source >> 8) & 0xFF;
+    frame[idx++] = sensor_id & 0xFF;
+    frame[idx++] = (sensor_id >> 8) & 0xFF;
 
-    memcpy(&frame[idx], sensorData, sizeof(sensor_data_t));
+    memcpy(&frame[idx], sensor_data, sizeof(sensor_data_t));
     idx += sizeof(sensor_data_t);
 
     uint8_t total_length = idx + 2;
@@ -44,11 +44,11 @@ int ieee_802154_transmit_sensor_data(uint16_t source, sensor_data_t *sensorData)
     if (result == ESP_OK)
     {
         printf("TX: %d: %0.2f %0.2f %0.2f (Bat. %d)\n",
-               sensorData->node_id,
-               sensorData->reading1,
-               sensorData->reading2,
-               sensorData->reading3,
-               sensorData->battery_mv);
+               sensor_data->sensor_id,
+               sensor_data->reading1,
+               sensor_data->reading2,
+               sensor_data->reading3,
+               sensor_data->battery_mv);
     }
     else
     {

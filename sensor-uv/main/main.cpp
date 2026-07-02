@@ -105,15 +105,15 @@ extern "C" void app_main(void)
         uv = (float)raw_value;
     }
 
-    sensor_data_t sensorData;
+    sensor_data_t sensor_data;
 
-    sensorData.node_id = NET_H2_SENSOR_UV;
-    sensorData.reading1 = uv;
-    sensorData.reading2 = 0;
-    sensorData.reading3 = 0;
-    sensorData.battery_mv = 0;
+    sensor_data.sensor_id = SENSOR_UV;
+    sensor_data.reading1 = uv;
+    sensor_data.reading2 = 0;
+    sensor_data.reading3 = 0;
+    sensor_data.battery_mv = 0;
 
-    ieee_802154_transmit_sensor_data(NET_H2_SENSOR_UV, &sensorData);
+    ieee_802154_transmit_sensor_data(SENSOR_UV, &sensor_data);
 
     vTaskDelay(pdMS_TO_TICKS(20));
 

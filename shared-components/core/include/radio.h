@@ -17,7 +17,7 @@ extern "C"
 {
 #endif
 
-    extern int ieee_802154_transmit_sensor_data(uint16_t source, sensor_data_t *sensorData);
+    extern int ieee_802154_transmit_sensor_data(sensor_id_t sensor_id, sensor_data_t *sensor_data);
 
 #ifdef __cplusplus
 }

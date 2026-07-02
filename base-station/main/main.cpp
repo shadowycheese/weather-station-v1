@@ -17,9 +17,13 @@
 #include "nvs_flash.h"
 #include "ui/display.h"
 #include "ui/edt.h"
-#include "data/sensor.h"
+#include "data/remote-sensor.h"
+#include "data/local-sensor.h"
 #include "data/db.h"
 #include "net/network.h"
+#include "log/log.h"
+
+const char *TAG = "APP";
 
 Display display;
 Db data;
@@ -28,13 +32,17 @@ extern "C" void app_main(void)
 {
     nvs_flash_init();
 
-    wifi_init();
-
-    gpio_install_isr_service(0);
-
     edt_init(&display);
 
     display.start();
 
-    // sensor_read_start(&data);
+    wifi_init();
+
+    app_log(LOG_INFO, TAG, "Starting GPIO ISR service");
+    gpio_install_isr_service(0);
+
+    local_sensor_read_start();
+    remote_sensor_read_start();
+
+    display.set_boot_complete();
 }
