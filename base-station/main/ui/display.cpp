@@ -92,11 +92,15 @@ void Display::init_ui()
 
 void Display::set_boot_complete()
 {
+    bsp_display_lock(-1);
+
     _logMessages.visible(false);
     _labelTemp.visible(true);
     _labelHumidity.visible(true);
     _labelPressure.visible(true);
     _labelUV.visible(true);
+
+    bsp_display_unlock();
 }
 
 void Display::log_message(log_level_t log_level, const char *message)

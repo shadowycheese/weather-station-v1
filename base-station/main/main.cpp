@@ -42,7 +42,7 @@ extern "C" void app_main(void)
     gpio_install_isr_service(0);
 
     local_sensor_read_start();
-    remote_sensor_read_start();
+    // remote_sensor_read_start();
 
     display.set_boot_complete();
 }

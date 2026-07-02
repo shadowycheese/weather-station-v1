@@ -10,8 +10,8 @@ idf_component_register(
         net/network.cpp
         ../../shared-components/core/src/espio.c
         ../../shared-components/core/src/espspi.c
-        ../../shared-components/core/src/espi2c.c
-    INCLUDE_DIRS 
+         ../../shared-components/core/src/espi2c.c
+   INCLUDE_DIRS 
         "../../shared-components/core/include"
         "${CMAKE_CURRENT_LIST_DIR}"
         "${CMAKE_CURRENT_LIST_DIR}/ui"      
@@ -27,9 +27,8 @@ idf_component_register(
         nvs_flash 
         lwip
         lvgl__lvgl
-        chiehmin__sgp30
         waveshare__esp32_p4_platform
-        waveshare__esp_lcd_ili9881c
+        waveshare__esp_lcd_ili9881c        
 )
 
 idf_component_get_property(LVGL_LIB lvgl__lvgl COMPONENT_LIB)

@@ -11,7 +11,6 @@
 #include "models.h"
 #include "utils.h"
 #include "log/log.h"
-#include "sgp30/sgp30.h"
 
 #define i2c_config_t bme280_i2c_config_backend_t
 #include "bme280.h"
@@ -114,25 +113,25 @@ void read_bme280()
 
 void init_sgp30()
 {
-    i2c_config_t config = create_i2c_input_configration(SGP30_SDA_IO, SGP30_SCL_IO, SGP30_FREQ_HZ);
+    /* i2c_config_t config = create_i2c_input_configration(SGP30_SDA_IO, SGP30_SCL_IO, SGP30_FREQ_HZ);
 
-    _sgp30_i2c_bus = i2c_bus_create(SGP30_I2C_NUM, reinterpret_cast<const bme280_i2c_config_backend_t *>(&config));
+     _sgp30_i2c_bus = i2c_bus_create(SGP30_I2C_NUM, reinterpret_cast<const bme280_i2c_config_backend_t *>(&config));
 
-    sgp30_config_t sgp30_config;
-    sgp30_config.i2c_address = SGP30_I2C_ID;
-    sgp30_config.i2c_master_port = SGP30_I2C_NUM;
+     sgp30_config_t sgp30_config;
+     sgp30_config.i2c_address = SGP30_I2C_ID;
+     sgp30_config.i2c_master_port = SGP30_I2C_NUM;
 
-    esp_err_t err = sgp30_init(&sgp30_config);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to assign SGP30 device footprint on bus!");
-        return;
-    }
+     esp_err_t err = sgp30_init(&sgp30_config);
+     if (err != ESP_OK)
+     {
+         ESP_LOGE(TAG, "Failed to assign SGP30 device footprint on bus!");
+         return;
+     }*/
 }
 
 void read_sgp30()
 {
-    uint16_t eco2 = 0;
+    /*uint16_t eco2 = 0;
     uint16_t tvoc = 0;
 
     // Call the measurement macro
@@ -160,7 +159,7 @@ void read_sgp30()
     else
     {
         ESP_LOGE(TAG, "I2C Transaction Error reading SGP30!");
-    }
+    }*/
 }
 
 void read_sensors(void *)
