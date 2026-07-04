@@ -14,7 +14,9 @@ extern "C"
 
     extern esp_err_t bme280_reset();
 
-    extern esp_err_t bme280_init(i2c_master_bus_handle_t bus_handle, const uint16_t dev_addr, const int speed);
+    extern esp_err_t bme280_init(i2c_master_bus_handle_t bus_handle, const uint16_t dev_addr, const int speed, bool force_mode);
+
+    extern esp_err_t bme280_delete();
 
     extern esp_err_t bme280_readout(float *temperature, float *pressure, float *humidity);
 

@@ -77,7 +77,12 @@ static esp_err_t bme280_write(uint8_t addr, const uint8_t *din, size_t size)
     return ESP_OK;
 }
 
-esp_err_t bme280_set_measurement_mode()
+esp_err_t bme280_delete()
+{
+    return i2c_master_bus_rm_device(_bme280_i2c_dev_handle);
+}
+
+esp_err_t bme280_set_measurement_mode(bool force_mode)
 {
     // Sets Humidity to ×4 oversampling
     uint8_t ctrl_mes = 0x03;
@@ -88,8 +93,8 @@ esp_err_t bme280_set_measurement_mode()
         return err;
     }
 
-    //  Sets Temp to ×2, Pressure to ×8, and triggers Forced Mode).
-    ctrl_mes = 0x6F;
+    //  Sets Temp to ×2, Pressure to ×8 + optional force mode in bit 1 -> 0000 0010).
+    ctrl_mes = force_mode ? 0x6D : 0x6F;
     err = bme280_write(BME280_REG_MESCTL, &ctrl_mes, 1);
 
     return err;
@@ -149,7 +154,7 @@ esp_err_t bme280_reset()
     return bme280_write(BME280_REG_RESET, din, sizeof din);
 }
 
-esp_err_t bme280_reset_and_configure()
+esp_err_t bme280_reset_and_configure(bool force_mode)
 {
     esp_err_t error = bme280_reset();
 
@@ -162,7 +167,7 @@ esp_err_t bme280_reset_and_configure()
         bme280_calibrate();
 
         // Apply settings
-        bme280_set_measurement_mode();
+        bme280_set_measurement_mode(force_mode);
 
         ESP_LOGI("bme280", "Dumping calibration...");
         ESP_LOG_BUFFER_HEX("bme280", &_bme280.cmps, sizeof(_bme280.cmps));
@@ -175,7 +180,7 @@ esp_err_t bme280_reset_and_configure()
     return error;
 }
 
-esp_err_t bme280_init(i2c_master_bus_handle_t bus_handle, const uint16_t dev_addr, const int speed)
+esp_err_t bme280_init(i2c_master_bus_handle_t bus_handle, const uint16_t dev_addr, const int speed, bool force_mode)
 {
     i2c_device_config_t dev_config = {};
     dev_config.device_address = dev_addr;
@@ -188,7 +193,7 @@ esp_err_t bme280_init(i2c_master_bus_handle_t bus_handle, const uint16_t dev_add
     if (err == ESP_OK)
     {
         ESP_LOGI("bme280", "device_create success on 0x%x", dev_addr);
-        return bme280_reset_and_configure(_bme280);
+        return bme280_reset_and_configure(force_mode);
     }
     else
     {

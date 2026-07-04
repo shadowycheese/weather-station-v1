@@ -10,7 +10,7 @@
 #include "radio.h"
 #include "espio.h"
 #include "sgp30/sgp30.h"
-#include "bme280/bme280.h"
+#include "bme280.h"
 #include "math.h"
 #include "driver/i2c.h"
 #include "driver/i2c_master.h"
@@ -251,7 +251,7 @@ void sensor_read_start()
     ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &_i2c_bus));
 
     sgp30_init(_i2c_bus, SGP30_I2C_ID, I2C_FREQ_HZ);
-    bme280_init(_i2c_bus, BME280_I2C_ID, I2C_FREQ_HZ);
+    bme280_init(_i2c_bus, BME280_I2C_ID, I2C_FREQ_HZ, false);
 
     BaseType_t result = xTaskCreatePinnedToCore(
         read_sensors,

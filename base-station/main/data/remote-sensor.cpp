@@ -81,7 +81,6 @@ void uart_task(void *pvParameters)
 
     for (;;)
     {
-        // Block indefinitely until ANY producer posts a job to the queue
         if (xQueueReceive(_sensor_job_queue, &job, portMAX_DELAY) == pdTRUE)
         {
             switch (job.type)

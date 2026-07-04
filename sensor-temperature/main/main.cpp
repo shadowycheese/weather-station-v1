@@ -6,31 +6,31 @@
 #include "esp_sleep.h"
 #include "models.h"
 #include "nvs_flash.h"
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 #include "espio.h"
-#include "espi2c.h"
 #include "radio.h"
 #include "utils.h"
-
-#define i2c_config_t bme280_i2c_config_backend_t
 #include "bme280.h"
-#undef i2c_config_t
 
 #define I2C_MASTER_SDA_IO GPIO_NUM_4
 #define I2C_MASTER_SCL_IO GPIO_NUM_5
 #define I2C_MASTER_NUM I2C_NUM_0
-#define I2C_MASTER_FREQ_HZ 10000
+#define I2C_MASTER_FREQ_HZ 100000
 
-#define BME280_I2C_ADDRESS 0x77
-#define BME280_POWER_PIN GPIO_NUM_2
+#define BME280_I2C_ADDRESS 0x76
+#define BME280_POWER_PIN GPIO_NUM_3
 
-#define DEEP_SLEEP_MILLIS (10ULL * 1000ULL * 1000ULL)
-#define ERROR_DEEP_SLEEP_MILLIS (5ULL * 1000ULL * 1000ULL)
+#define DEEP_SLEEP_MILLIS (60ULL * 1000ULL * 1000ULL)
+#define ERROR_DEEP_SLEEP_MILLIS (30ULL * 1000ULL * 1000ULL)
 
 static const char *TAG = "MAIN_APP";
 
+static i2c_master_bus_handle_t _i2c_bus;
+
 void enter_deep_sleep(uint64_t us)
 {
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RC_FAST, ESP_PD_OPTION_OFF);
+
     esp_sleep_enable_timer_wakeup(us);
 
     esp_deep_sleep_start();
@@ -59,33 +59,26 @@ extern "C" void app_main(void)
 {
     ensure_success(nvs_flash_init());
 
+    ensure_success(gpio_hold_dis((gpio_num_t)BME280_POWER_PIN));
+
     ensure_success(configure_output_pin(BME280_POWER_PIN));
 
     ensure_success(gpio_set_level(BME280_POWER_PIN, 1));
 
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    i2c_config_t config = create_i2c_input_configration(I2C_MASTER_SDA_IO, I2C_MASTER_SCL_IO, I2C_MASTER_FREQ_HZ);
+    i2c_master_bus_config_t bus_config = {};
+    bus_config.clk_source = I2C_CLK_SRC_DEFAULT;
+    bus_config.i2c_port = I2C_MASTER_NUM;
+    bus_config.sda_io_num = I2C_MASTER_SDA_IO;
+    bus_config.scl_io_num = I2C_MASTER_SCL_IO;
+    bus_config.glitch_ignore_cnt = 7;
+    bus_config.flags.enable_internal_pullup = true;
+    ensure_success(i2c_new_master_bus(&bus_config, &_i2c_bus));
 
-    i2c_bus_handle_t i2c_bus = i2c_bus_create(I2C_MASTER_NUM, reinterpret_cast<const bme280_i2c_config_backend_t *>(&config));
+    ensure_success(bme280_init(_i2c_bus, BME280_I2C_ADDRESS, I2C_MASTER_FREQ_HZ, true));
 
-    if (i2c_bus == NULL)
-    {
-        handle_error("BME280 I2C bus creation failed");
-    }
-
-    bme280_handle_t bme280 = bme280_create(i2c_bus, 0x77);
-
-    if (bme280 == NULL)
-    {
-        handle_error("BME280 device creation failed");
-    }
-
-    ensure_success(bme280_default_init(bme280));
-
-    ensure_success(bme280_take_forced_measurement(bme280));
-
-    vTaskDelay(pdMS_TO_TICKS(25));
+    vTaskDelay(pdMS_TO_TICKS(30));
 
     sensor_data_t sensor_data;
 
@@ -97,16 +90,16 @@ extern "C" void app_main(void)
 
     for (;;)
     {
-        if (bme280_read_temperature(bme280, &temperature) == ESP_OK &&
-            bme280_read_humidity(bme280, &humidity) == ESP_OK &&
-            bme280_read_pressure(bme280, &pressure) == ESP_OK)
+        if (bme280_readout(&temperature, &pressure, &humidity) == ESP_OK)
         {
             sensor_data.reading1 = temperature;
             sensor_data.reading2 = humidity;
             sensor_data.reading3 = pressure;
+            sensor_data.battery_mv = -1;
 
             ieee_802154_transmit_sensor_data(SENSOR_TEMP_OUTSIDE1, &sensor_data);
 
+            // Give the radio some time
             vTaskDelay(pdMS_TO_TICKS(20));
 
             break;
@@ -114,17 +107,22 @@ extern "C" void app_main(void)
         else
         {
             ESP_LOGW(TAG, "Failed to read data from BME280.. retrying");
-
-            vTaskDelay(pdMS_TO_TICKS(20));
         }
     }
 
+    bme280_delete();
+
+    i2c_del_master_bus(_i2c_bus);
+
     gpio_set_level(BME280_POWER_PIN, 0);
 
-    i2c_driver_delete(I2C_MASTER_NUM);
+    gpio_pullup_dis(BME280_POWER_PIN);
+    gpio_pulldown_dis(BME280_POWER_PIN);
 
     gpio_set_direction(I2C_MASTER_SDA_IO, GPIO_MODE_INPUT);
     gpio_set_direction(I2C_MASTER_SCL_IO, GPIO_MODE_INPUT);
+
+    gpio_hold_en((gpio_num_t)BME280_POWER_PIN);
 
     enter_deep_sleep(DEEP_SLEEP_MILLIS);
 }

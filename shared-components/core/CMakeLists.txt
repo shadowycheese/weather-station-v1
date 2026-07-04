@@ -1,2 +1,9 @@
-idf_component_register(SRCS "src/radio.c" "src/espio.c" "src/utils.c"
-                       INCLUDE_DIRS "include")
+idf_component_register(SRCS 
+                           "core/src/radio.c" 
+                           "core/src/espio.c" 
+                           "core/src/cutils.c" 
+                           "core/src/espuart.c"
+                           "bme280/src/bme280.c"
+                       INCLUDE_DIRS 
+                           "core/include"
+                           "bme280/include")
