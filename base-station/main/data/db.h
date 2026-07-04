@@ -47,7 +47,8 @@ private:
 
     timeseries_data_t to_time_series_data(sensor_data_t *sensor_data, data_type_t data_type, float value);
 
-    timeseries_data_t _latest[SENSOR_COUNT][DATA_MAX];
+    // timeseries_data_t _latest[SENSOR_COUNT][DATA_MAX];
+    timeseries_data_t _latest[1][DATA_MAX];
     timeseries_data_t *_unbucketed;
     timeseries_data_t *_24_hours;
     timeseries_data_t *_7_days;

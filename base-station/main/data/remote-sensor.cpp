@@ -2,18 +2,17 @@
 #include "ui/edt.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+#include "driver/uart.h"
 #include "espio.h"
 #include "data/db.h"
 
 static const char *TAG = "REMOTE-SENSOR";
 
-static spi_device_handle_t _spi_handle = NULL;
-
-#define GPIO_MOSI 1
-#define GPIO_MISO 2
-#define GPIO_SCLK 3
-#define GPIO_CS 4
-#define GPIO_HANDSHAKE GPIO_NUM_5
+#define H2_UART_PORT UART_NUM_1
+#define H2_TX_PIN GPIO_NUM_20
+#define H2_RX_PIN GPIO_NUM_21
+#define H2_HANDSHAKE_PIN GPIO_NUM_22
+#define BUF_SIZE 256
 
 typedef enum
 {
@@ -28,11 +27,9 @@ typedef struct
 static QueueHandle_t _sensor_job_queue = NULL;
 static TaskHandle_t _sensor_task_handle;
 
-DMA_ATTR static uint8_t _spi_rx_buffer[128];
-
-void sensor_spi_isr(void *_)
+void sensor_uart_isr(void *_)
 {
-    if (gpio_get_level(GPIO_HANDSHAKE) != 1)
+    if (gpio_get_level(H2_HANDSHAKE_PIN) != 1)
     {
         return;
     }
@@ -51,30 +48,36 @@ void sensor_spi_isr(void *_)
     }
 }
 
-void spi_read()
+void uart_read()
 {
+    printf("AA");
     edt_job_t job = {};
 
     job.type = JOB_TYPE_SENSOR_DATA;
     job.payload.sensor_data = {};
 
-    spi_transaction_t t = {};
+    static uint8_t uart_rx_buffer[BUF_SIZE];
 
-    t.length = sizeof(sensor_data_t) * 8;
-    t.tx_buffer = NULL;
-    t.rx_buffer = _spi_rx_buffer;
+    vTaskDelay(pdMS_TO_TICKS(2));
 
-    if (spi_device_polling_transmit(_spi_handle, &t) == ESP_OK)
+    int bytes_read = uart_read_bytes(H2_UART_PORT, uart_rx_buffer, BUF_SIZE - 1, pdMS_TO_TICKS(10));
+
+    if (bytes_read > 0)
     {
-        memcpy(&job.payload.sensor_data, _spi_rx_buffer, sizeof(sensor_data_t));
+        uart_rx_buffer[bytes_read] = '\0';
 
-        Db::handle_sensor_data(job.payload.sensor_data);
-
-        edt_post(job);
+        // Process your packet safely alongside your active Wi-Fi / SNTP stack
+        printf("[%lld] Handshake Triggered! Read %d bytes from H2\n",
+               (long long)time(NULL), bytes_read);
     }
+    memcpy(&job.payload.sensor_data, uart_rx_buffer, sizeof(sensor_data_t));
+
+    Db::handle_sensor_data(job.payload.sensor_data);
+
+    edt_post(job);
 }
 
-void spi_task(void *pvParameters)
+void uart_task(void *pvParameters)
 {
     sensor_job_t job;
 
@@ -86,7 +89,7 @@ void spi_task(void *pvParameters)
             switch (job.type)
             {
             case REMOTE_SENSOR_DATA:
-                spi_read();
+                uart_read();
                 break;
             }
         }
@@ -97,21 +100,27 @@ extern "C"
 {
     void remote_sensor_read_start()
     {
-        _spi_handle = init_spi_master(SPI2_HOST,
-                                      GPIO_MOSI,
-                                      GPIO_MISO,
-                                      GPIO_SCLK,
-                                      GPIO_CS,
-                                      GPIO_HANDSHAKE);
+        // ---- A. Configure UART Peripherals ----
+        uart_config_t uart_config = {
+            .baud_rate = 115200,
+            .data_bits = UART_DATA_8_BITS,
+            .parity = UART_PARITY_DISABLE,
+            .stop_bits = UART_STOP_BITS_1,
+            .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+            .source_clk = UART_SCLK_DEFAULT,
+        };
+        uart_param_config(H2_UART_PORT, &uart_config);
+        uart_set_pin(H2_UART_PORT, H2_TX_PIN, H2_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        uart_driver_install(H2_UART_PORT, BUF_SIZE * 2, 0, 0, NULL, 0);
 
         _sensor_job_queue = xQueueCreate(256, sizeof(sensor_job_t));
 
         app_log(LOG_INFO, TAG, "Starting remote sensor receiver task");
 
-        xTaskCreatePinnedToCore(spi_task, "remote_sensors", 4096, NULL, 3, &_sensor_task_handle, 0);
+        xTaskCreatePinnedToCore(uart_task, "remote_sensors", 4096, NULL, 3, &_sensor_task_handle, 0);
 
-        configure_input_pin(GPIO_HANDSHAKE, GPIO_INTR_POSEDGE);
+        configure_input_pin(H2_HANDSHAKE_PIN, GPIO_INTR_POSEDGE);
 
-        gpio_isr_handler_add(GPIO_HANDSHAKE, sensor_spi_isr, (void *)GPIO_HANDSHAKE);
+        gpio_isr_handler_add(H2_HANDSHAKE_PIN, sensor_uart_isr, (void *)H2_HANDSHAKE_PIN);
     }
 }

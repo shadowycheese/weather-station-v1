@@ -1,9 +1,6 @@
 #ifndef Local_Sensor_h
 #define Local_Sensor_h
 
-#include "espspi.h"
-#include "data/db.h"
-
 #ifdef __cplusplus
 extern "C"
 {

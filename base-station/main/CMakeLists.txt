@@ -9,8 +9,8 @@ idf_component_register(
         data/db.cpp
         net/network.cpp
         ../../shared-components/core/src/espio.c
-        ../../shared-components/core/src/espspi.c
          ../../shared-components/core/src/espi2c.c
+         ../../shared-components/core/src/espuart.c
    INCLUDE_DIRS 
         "../../shared-components/core/include"
         "${CMAKE_CURRENT_LIST_DIR}"

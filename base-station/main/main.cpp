@@ -7,7 +7,6 @@
 #include "esp_log.h"
 #include "esp_memory_utils.h"
 #include "espio.h"
-#include "espspi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lv_demos.h"
@@ -41,8 +40,8 @@ extern "C" void app_main(void)
     app_log(LOG_INFO, TAG, "Starting GPIO ISR service");
     gpio_install_isr_service(0);
 
-    local_sensor_read_start();
-    // remote_sensor_read_start();
+    // local_sensor_read_start();
+    remote_sensor_read_start();
 
     display.set_boot_complete();
 }

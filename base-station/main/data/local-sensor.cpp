@@ -18,18 +18,10 @@
 
 #define TICK_INTERVAL 1000
 
-#define SGP30_SDA_IO GPIO_NUM_21
-#define SGP30_SCL_IO GPIO_NUM_22
-#define SGP30_I2C_NUM I2C_NUM_1
-#define SGP30_FREQ_HZ 100000
-#define SGP30_I2C_ID 0x58
-
-#define SPG30_TICKS_PER_NOTIFY 10
-
 #define BM280_SDA_IO GPIO_NUM_47
 #define BM280_SCL_IO GPIO_NUM_27
 #define BM280_I2C_NUM I2C_NUM_0
-#define BM280_FREQ_HZ 10000
+#define BM280_FREQ_HZ 100000
 #define BME280_I2C_ID 0x76
 
 #define BME280_TICKS_PER_READ 10
@@ -40,31 +32,39 @@ static const char *TAG = "LOCAL-SENSOR";
 i2c_bus_handle_t _bme280_i2c_bus;
 bme280_handle_t _bme280_handle;
 
-i2c_bus_handle_t _sgp30_i2c_bus;
-
-#define _sgp30_handle (_bme280_handle)
-
 uint32_t _task_ticks = 0;
 
 void init_bme280()
 {
+    app_log(LOG_INFO, TAG, "Initialized BME-280...");
+
     i2c_config_t config = create_i2c_input_configration(BM280_SDA_IO, BM280_SCL_IO, BM280_FREQ_HZ);
 
     _bme280_i2c_bus = i2c_bus_create(BM280_I2C_NUM, reinterpret_cast<const bme280_i2c_config_backend_t *>(&config));
 
     if (_bme280_i2c_bus == NULL)
     {
-        // handle_error("BME280 I2C bus creation failed");
+        app_log(LOG_ERROR, TAG, "Failed to create BME-280 I2C bus");
     }
 
     _bme280_handle = bme280_create(_bme280_i2c_bus, BME280_I2C_ID);
 
     if (_bme280_handle == NULL)
     {
-        // handle_error("BME280 device creation failed");
+        app_log(LOG_ERROR, TAG, "Failed to create BME-280 I2C device handle");
     }
 
-    ESP_ERROR_CHECK_WITHOUT_ABORT(bme280_default_init(_bme280_handle));
+    esp_err_t err = bme280_default_init(_bme280_handle);
+
+    if (err == ESP_OK)
+    {
+        app_log(LOG_INFO, TAG, "Initialized BME-280 I2C");
+    }
+    else
+    {
+        ESP_ERROR_CHECK(err);
+        app_log(LOG_ERROR, TAG, "Failed to initialized BME-280 I2C");
+    }
 }
 
 void read_bme280()
@@ -109,57 +109,6 @@ void read_bme280()
 
         vTaskDelay(pdMS_TO_TICKS(20));
     }
-}
-
-void init_sgp30()
-{
-    /* i2c_config_t config = create_i2c_input_configration(SGP30_SDA_IO, SGP30_SCL_IO, SGP30_FREQ_HZ);
-
-     _sgp30_i2c_bus = i2c_bus_create(SGP30_I2C_NUM, reinterpret_cast<const bme280_i2c_config_backend_t *>(&config));
-
-     sgp30_config_t sgp30_config;
-     sgp30_config.i2c_address = SGP30_I2C_ID;
-     sgp30_config.i2c_master_port = SGP30_I2C_NUM;
-
-     esp_err_t err = sgp30_init(&sgp30_config);
-     if (err != ESP_OK)
-     {
-         ESP_LOGE(TAG, "Failed to assign SGP30 device footprint on bus!");
-         return;
-     }*/
-}
-
-void read_sgp30()
-{
-    /*uint16_t eco2 = 0;
-    uint16_t tvoc = 0;
-
-    // Call the measurement macro
-    if (sgp30_read_measurements(&eco2, &tvoc) == ESP_OK)
-    {
-        if (_task_ticks < 15)
-        {
-            // For the first 15 seconds, the sensor returns placeholder baseline data (400ppm/0ppb)
-            ESP_LOGW(TAG, "SGP30 hot plate stabilizing... [%lu/15s]", _task_ticks);
-        }
-        else
-        {
-            sensor_data_t sensor_data;
-
-            sensor_data.sensor_id = SENSOR_AQ_INSIDE;
-            sensor_data.reading1 = (float)eco2;
-            sensor_data.reading2 = (float)tvoc;
-            sensor_data.battery_mv = -1;
-
-            Db::handle_sensor_data(sensor_data);
-
-            ESP_LOGI(TAG, "SGP30 -> eCO2: %u ppm | TVOC: %u ppb", eco2, tvoc);
-        }
-    }
-    else
-    {
-        ESP_LOGE(TAG, "I2C Transaction Error reading SGP30!");
-    }*/
 }
 
 void read_sensors(void *)
