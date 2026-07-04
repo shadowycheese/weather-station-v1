@@ -16,9 +16,9 @@
 #include "driver/i2c_master.h"
 
 #define UART_PORT UART_NUM_1
-#define UART_RX_PIN 0  // YELLOW -> 20
-#define UART_TX_PIN 1  // ORANGE -> 21
-#define UART_RTS_PIN 2 // BLUE -> 22n
+#define UART_RX_PIN GPIO_NUM_0  // YELLOW -> 20
+#define UART_TX_PIN GPIO_NUM_1  // ORANGE -> 21
+#define UART_RTS_PIN GPIO_NUM_2 // BLUE -> 22
 #define UART_BUF_SIZE 256
 #define UART_SPEED 460800
 
@@ -124,7 +124,9 @@ void handle_sensor_data(sensor_data_t *sensor_data)
            sensor_data->reading3,
            sensor_data->battery_mv);
 
+    gpio_set_level(UART_RTS_PIN, 1);
     uart_write_bytes(UART_PORT, sensor_data, sizeof(sensor_data_t));
+    gpio_set_level(UART_RTS_PIN, 0);
 
     vTaskDelay(pdMS_TO_TICKS(20));
 }
@@ -205,9 +207,9 @@ void read_bme280()
             float absolute_humidity = calculate_absolute_humidity(temperature, humidity);
 
             ESP_ERROR_CHECK_WITHOUT_ABORT(sgp30_set_humidity(absolute_humidity));
-
-            xSemaphoreGive(_sensor_data_sem);
         }
+
+        xSemaphoreGive(_sensor_data_sem);
     }
     else
     {
@@ -275,10 +277,11 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(start_uart(UART_PORT,
                                UART_TX_PIN,
                                UART_RX_PIN,
-                               UART_RTS_PIN,
+                               UART_PIN_NO_CHANGE,
                                UART_PIN_NO_CHANGE,
                                UART_BUF_SIZE,
                                UART_SPEED));
+    configure_output_pin(UART_RTS_PIN);
 
     ESP_ERROR_CHECK(esp_ieee802154_enable());
     ESP_ERROR_CHECK(esp_ieee802154_set_promiscuous(true));

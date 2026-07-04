@@ -52,7 +52,6 @@ typedef struct
         int16_t H5;
         int8_t H6;
     } cmps;
-    // Storage for a variable proportional to temperature.
     int32_t t_fine;
 } bme280_t;
 

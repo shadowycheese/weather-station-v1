@@ -4,7 +4,6 @@ idf_component_register(
         log/log.cpp
         ui/display.cpp
         ui/edt.cpp
-        data/local-sensor.cpp
         data/remote-sensor.cpp
         data/db.cpp
         net/network.cpp

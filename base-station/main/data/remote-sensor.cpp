@@ -4,6 +4,7 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "espio.h"
+#include "espuart.h"
 #include "data/db.h"
 
 static const char *TAG = "REMOTE-SENSOR";
@@ -13,6 +14,7 @@ static const char *TAG = "REMOTE-SENSOR";
 #define H2_RX_PIN GPIO_NUM_21
 #define H2_HANDSHAKE_PIN GPIO_NUM_22
 #define BUF_SIZE 256
+#define UART_SPEED 460800
 
 typedef enum
 {
@@ -50,7 +52,6 @@ void sensor_uart_isr(void *_)
 
 void uart_read()
 {
-    printf("AA");
     edt_job_t job = {};
 
     job.type = JOB_TYPE_SENSOR_DATA;
@@ -65,11 +66,8 @@ void uart_read()
     if (bytes_read > 0)
     {
         uart_rx_buffer[bytes_read] = '\0';
-
-        // Process your packet safely alongside your active Wi-Fi / SNTP stack
-        printf("[%lld] Handshake Triggered! Read %d bytes from H2\n",
-               (long long)time(NULL), bytes_read);
     }
+
     memcpy(&job.payload.sensor_data, uart_rx_buffer, sizeof(sensor_data_t));
 
     Db::handle_sensor_data(job.payload.sensor_data);
@@ -101,17 +99,7 @@ extern "C"
     void remote_sensor_read_start()
     {
         // ---- A. Configure UART Peripherals ----
-        uart_config_t uart_config = {
-            .baud_rate = 115200,
-            .data_bits = UART_DATA_8_BITS,
-            .parity = UART_PARITY_DISABLE,
-            .stop_bits = UART_STOP_BITS_1,
-            .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-            .source_clk = UART_SCLK_DEFAULT,
-        };
-        uart_param_config(H2_UART_PORT, &uart_config);
-        uart_set_pin(H2_UART_PORT, H2_TX_PIN, H2_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-        uart_driver_install(H2_UART_PORT, BUF_SIZE * 2, 0, 0, NULL, 0);
+        start_uart(H2_UART_PORT, H2_TX_PIN, H2_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, BUF_SIZE * 2, UART_SPEED);
 
         _sensor_job_queue = xQueueCreate(256, sizeof(sensor_job_t));
 

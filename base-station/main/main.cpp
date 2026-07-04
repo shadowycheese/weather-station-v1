@@ -17,7 +17,6 @@
 #include "ui/display.h"
 #include "ui/edt.h"
 #include "data/remote-sensor.h"
-#include "data/local-sensor.h"
 #include "data/db.h"
 #include "net/network.h"
 #include "log/log.h"
