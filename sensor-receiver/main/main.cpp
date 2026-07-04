@@ -32,7 +32,7 @@
 #define I2C_NUM I2C_NUM_0
 #define I2C_FREQ_HZ 100000
 
-#define BME280_I2C_ID (0x77)
+#define BME280_I2C_ID (0x76)
 #define SGP30_I2C_ID (0x58)
 
 static portMUX_TYPE _buffer_mux = portMUX_INITIALIZER_UNLOCKED;
@@ -47,7 +47,6 @@ extern "C"
 }
 
 static i2c_master_bus_handle_t _i2c_bus;
-static bmx280_t *_bmx280;
 
 static sensor_data_t _sensor_data[256];
 static volatile uint8_t _sensor_data_head = 0;
@@ -189,7 +188,7 @@ void read_bme280()
     float humidity = 0.0;
     float pressure = 0.0;
 
-    if (bmx280_readout(_bmx280, &temperature, &pressure, &humidity) == ESP_OK)
+    if (bme280_readout(&temperature, &pressure, &humidity) == ESP_OK)
     {
         sensor_data_t sensor_data;
 
@@ -201,11 +200,14 @@ void read_bme280()
 
         queue_sensor_data(&sensor_data);
 
-        float absolute_humidity = calculate_absolute_humidity(temperature, humidity);
+        if (_task_ticks > SGP30_TICKS_BEFORE_READ)
+        {
+            float absolute_humidity = calculate_absolute_humidity(temperature, humidity);
 
-        ESP_ERROR_CHECK_WITHOUT_ABORT(sgp30_set_humidity(absolute_humidity));
+            ESP_ERROR_CHECK_WITHOUT_ABORT(sgp30_set_humidity(absolute_humidity));
 
-        xSemaphoreGive(_sensor_data_sem);
+            xSemaphoreGive(_sensor_data_sem);
+        }
     }
     else
     {
@@ -247,10 +249,7 @@ void sensor_read_start()
     ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &_i2c_bus));
 
     sgp30_init(_i2c_bus, SGP30_I2C_ID, I2C_FREQ_HZ);
-    _bmx280 = bmx280_create_master(_i2c_bus);
-
-    bmx280_device_create(_bmx280, BME280_I2C_ID);
-    bmx280_init(_bmx280);
+    bme280_init(_i2c_bus, BME280_I2C_ID, I2C_FREQ_HZ);
 
     BaseType_t result = xTaskCreatePinnedToCore(
         read_sensors,
