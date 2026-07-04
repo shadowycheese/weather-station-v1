@@ -24,6 +24,11 @@ esp_err_t start_uart(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts
         return err;
     }
 
+    if (rts_io_num != UART_PIN_NO_CHANGE)
+    {
+        uart_set_line_inverse(uart_num, UART_SIGNAL_RTS_INV);
+    }
+
     err = uart_driver_install(uart_num, buffer_size, 0, 0, NULL, 0);
     return err;
 }

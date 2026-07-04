@@ -44,4 +44,20 @@ extern "C" void app_main(void)
     remote_sensor_read_start();
 
     display.set_boot_complete();
+
+    int last_val = 0;
+
+    for (;;)
+    {
+        int val = gpio_get_level((gpio_num_t)22);
+
+        if (val != last_val)
+        {
+            printf("Changed: %d\n", val);
+
+            last_val = val;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
 }

@@ -285,8 +285,14 @@ esp_err_t bmx280_init(bmx280_t *bmx280)
         // Read calibration data.
         bmx280_calibrate(bmx280);
 
+        bmx280_setMode(bmx280, BMX280_MODE_CYCLE);
+
         ESP_LOGI("bmx280", "Dumping calibration...");
         ESP_LOG_BUFFER_HEX("bmx280", &bmx280->cmps, sizeof(bmx280->cmps));
+    }
+    else
+    {
+        ESP_ERROR_CHECK_WITHOUT_ABORT(error);
     }
 
     return error;
@@ -327,15 +333,25 @@ esp_err_t bmx280_configure(bmx280_t *bmx280, bmx280_config_t *cfg)
 
 esp_err_t bmx280_setMode(bmx280_t *bmx280, bmx280_mode_t mode)
 {
-    uint8_t ctrl_mes;
     esp_err_t err;
 
-    if ((err = bmx280_read(bmx280, BMX280_REG_MESCTL, &ctrl_mes, 1)) != ESP_OK)
+    // if ((err = bmx280_read(bmx280, BMX280_REG_MESCTL, &ctrl_mes, 1)) != ESP_OK)
+    //   return err;
+
+    // ctrl_mes = (ctrl_mes & (~3)) | mode;
+
+    uint8_t ctrl_mes = 0x01;
+    err = bmx280_write(bmx280, BMX280_REG_HUMCTL, &ctrl_mes, 1);
+
+    if (err != ESP_OK)
+    {
         return err;
+    }
 
-    ctrl_mes = (ctrl_mes & (~3)) | mode;
+    ctrl_mes = 0x27;
+    err = bmx280_write(bmx280, BMX280_REG_MESCTL, &ctrl_mes, 1);
 
-    return bmx280_write(bmx280, BMX280_REG_MESCTL, &ctrl_mes, 1);
+    return err;
 }
 
 esp_err_t bmx280_getMode(bmx280_t *bmx280, bmx280_mode_t *mode)
@@ -370,68 +386,74 @@ bool bmx280_isSampling(bmx280_t *bmx280)
         return false;
 }
 
-// LEGAL NOTE:
-// Any code between below the caption "// HERE BE DRAGONS" and above the caption
-// "// END OF DRAGONS" contains modified versions of code owned by Bosch
-// Sensortec GmbH and it is not clearly licensed, therefore this code is not
-// covered by the MIT of this repository. Use at your own risk.
-
-// HERE BE DRAGONS
-// This code is revised from the Bosch code within the datasheet of the BME280.
-// I do not understand it enough to tell you what it does.
-// No touchies.
-
-// Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
-// t_fine carries fine temperature as global value
-int32_t BME280_compensate_T_int32(bmx280_t *bmx280, int32_t adc_T)
+float bme280_compenstate_T(bmx280_t *sens, uint8_t *data)
 {
-    int32_t var1, var2, T;
-    var1 = ((((adc_T >> 3) - ((int32_t)bmx280->cmps.T1 << 1))) * ((int32_t)bmx280->cmps.T2)) >> 11;
-    var2 = (((((adc_T >> 4) - ((int32_t)bmx280->cmps.T1)) * ((adc_T >> 4) - ((int32_t)bmx280->cmps.T1))) >> 12) * ((int32_t)bmx280->cmps.T3)) >> 14;
-    bmx280->t_fine = var1 + var2;
-    T = (bmx280->t_fine * 5 + 128) >> 8;
-    return T;
+    printf("T: %02X %02X %02X\n", data[0], data[1], data[2]);
+    int32_t var1, var2;
+    int32_t adc_T = ((uint32_t)data[0] << 16) | ((uint32_t)data[1] << 8) | data[2];
+    if (adc_T == 0x800000)
+    { // value in case temp measurement was disabled
+        return ESP_FAIL;
+    }
+    adc_T >>= 4;
+
+    var1 = ((((adc_T >> 3) - ((int32_t)sens->cmps.T1 << 1))) * ((int32_t)sens->cmps.T2)) >> 11;
+
+    var2 = (((((adc_T >> 4) - ((int32_t)sens->cmps.T1)) * ((adc_T >> 4) - ((int32_t)sens->cmps.T1))) >> 12) * ((int32_t)sens->cmps.T3)) >> 14;
+
+    sens->t_fine = var1 + var2;
+    return ((sens->t_fine * 5 + 128) >> 8) / 100.0;
 }
 
-// Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
-// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
-uint32_t BME280_compensate_P_int64(bmx280_t *bmx280, int32_t adc_P)
+float bme280_compenstate_P(bmx280_t *sens, uint8_t *data)
 {
+    printf("P: %02X %02X %02X\n", data[0], data[1], data[2]);
+    int32_t adc_P = (data[0] << 16) | (data[1] << 8) | data[2];
+    if (adc_P == 0x800000)
+    { // value in case pressure measurement was disabled
+        return ESP_FAIL;
+    }
     int64_t var1, var2, p;
-    var1 = ((int64_t)bmx280->t_fine) - 128000;
-    var2 = var1 * var1 * (int64_t)bmx280->cmps.P6;
-    var2 = var2 + ((var1 * (int64_t)bmx280->cmps.P5) << 17);
-    var2 = var2 + (((int64_t)bmx280->cmps.P4) << 35);
-    var1 = ((var1 * var1 * (int64_t)bmx280->cmps.P3) >> 8) + ((var1 * (int64_t)bmx280->cmps.P2) << 12);
-    var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)bmx280->cmps.P1) >> 33;
+    adc_P >>= 4;
+    var1 = ((int64_t)sens->t_fine) - 128000;
+    var2 = var1 * var1 * (int64_t)sens->cmps.P6;
+    var2 = var2 + ((var1 * (int64_t)sens->cmps.P5) << 17);
+    var2 = var2 + (((int64_t)sens->cmps.P4) << 35);
+    var1 = ((var1 * var1 * (int64_t)sens->cmps.P3) >> 8) + ((var1 * (int64_t)sens->cmps.P2) << 12);
+    var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)sens->cmps.P1) >> 33;
     if (var1 == 0)
     {
-        return 0; // avoid exception caused by division by zero
+        return ESP_FAIL; // avoid exception caused by division by zero
     }
     p = 1048576 - adc_P;
     p = (((p << 31) - var2) * 3125) / var1;
-    var1 = (((int64_t)bmx280->cmps.P9) * (p >> 13) * (p >> 13)) >> 25;
-    var2 = (((int64_t)bmx280->cmps.P8) * p) >> 19;
-    p = ((p + var1 + var2) >> 8) + (((int64_t)bmx280->cmps.P7) << 4);
-    return (uint32_t)p;
+    var1 = (((int64_t)sens->cmps.P9) * (p >> 13) * (p >> 13)) >> 25;
+    var2 = (((int64_t)sens->cmps.P8) * p) >> 19;
+    p = ((p + var1 + var2) >> 8) + (((int64_t)sens->cmps.P7) << 4);
+    p = p >> 8; // /256
+    return (float)p / 100;
 }
 
-// Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
-// Output value of “47445” represents 47445/1024 = 46.333 %RH
-uint32_t bme280_compensate_H_int32(bmx280_t *bmx280, int32_t adc_H)
+float bme280_compenstate_H(bmx280_t *sens, uint8_t *data)
 {
+    printf("H: %02X %02X\n", data[0], data[1]);
+    uint16_t data16 = ((uint16_t)data[0] << 8) | data[1];
+    float temp = 0.0;
+    int32_t adc_H = data16;
+    if (adc_H == 0x8000)
+    { // value in case humidity measurement was disabled
+        return ESP_FAIL;
+    }
     int32_t v_x1_u32r;
-    v_x1_u32r = (bmx280->t_fine - ((int32_t)76800));
-    v_x1_u32r = (((((adc_H << 14) - (((int32_t)bmx280->cmps.H4) << 20) - (((int32_t)bmx280->cmps.H5) * v_x1_u32r)) + ((int32_t)16384)) >> 15) * (((((((v_x1_u32r * ((int32_t)bmx280->cmps.H6)) >> 10) * (((v_x1_u32r * ((int32_t)bmx280->cmps.H3)) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) * ((int32_t)bmx280->cmps.H2) + 8192) >> 14));
-    v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((int32_t)bmx280->cmps.H1)) >> 4));
-    v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
-    v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
-    return (uint32_t)(v_x1_u32r >> 12);
+    v_x1_u32r = (sens->t_fine - ((int32_t)76800));
+    v_x1_u32r = (((((adc_H << 14) - (((int32_t)sens->cmps.H4) << 20) - (((int32_t)sens->cmps.H5) * v_x1_u32r)) + ((int32_t)16384)) >> 15) * (((((((v_x1_u32r * ((int32_t)sens->cmps.H6)) >> 10) * (((v_x1_u32r * ((int32_t)sens->cmps.H3)) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) * ((int32_t)sens->cmps.H2) + 8192) >> 14));
+    v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((int32_t)sens->cmps.H1)) >> 4));
+    v_x1_u32r = (v_x1_u32r < 0) ? 0 : v_x1_u32r;
+    v_x1_u32r = (v_x1_u32r > 419430400) ? 419430400 : v_x1_u32r;
+    return (v_x1_u32r >> 12) / 1024.0;
 }
 
-// END OF DRAGONS
-
-esp_err_t bmx280_readout(bmx280_t *bmx280, int32_t *temperature, uint32_t *pressure, uint32_t *humidity)
+esp_err_t bmx280_readout(bmx280_t *bmx280, float *temperature, float *pressure, float *humidity)
 {
     if (bmx280 == NULL)
     {
@@ -452,8 +474,7 @@ esp_err_t bmx280_readout(bmx280_t *bmx280, int32_t *temperature, uint32_t *press
             return error;
         }
 
-        *temperature = BME280_compensate_T_int32(bmx280,
-                                                 (buffer[0] << 12) | (buffer[1] << 4) | (buffer[2] >> 4));
+        *temperature = bme280_compenstate_T(bmx280, buffer);
     }
 
     if (pressure)
@@ -463,8 +484,7 @@ esp_err_t bmx280_readout(bmx280_t *bmx280, int32_t *temperature, uint32_t *press
             return error;
         }
 
-        *pressure = BME280_compensate_P_int64(bmx280,
-                                              (buffer[0] << 12) | (buffer[1] << 4) | (buffer[2] >> 4));
+        *pressure = bme280_compenstate_P(bmx280, buffer);
     }
 
     {
@@ -475,8 +495,7 @@ esp_err_t bmx280_readout(bmx280_t *bmx280, int32_t *temperature, uint32_t *press
                 return error;
             }
 
-            *humidity = bme280_compensate_H_int32(bmx280,
-                                                  (buffer[0] << 8) | buffer[1]);
+            *humidity = bme280_compenstate_H(bmx280, buffer);
         }
     }
 

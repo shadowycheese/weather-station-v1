@@ -18,7 +18,7 @@
 #define UART_PORT UART_NUM_1
 #define UART_RX_PIN 0  // YELLOW -> 20
 #define UART_TX_PIN 1  // ORANGE -> 21
-#define UART_RTS_PIN 2 // BLUE -> 22
+#define UART_RTS_PIN 2 // BLUE -> 22n
 #define UART_BUF_SIZE 256
 #define UART_SPEED 460800
 
@@ -127,7 +127,7 @@ void handle_sensor_data(sensor_data_t *sensor_data)
 
     uart_write_bytes(UART_PORT, sensor_data, sizeof(sensor_data_t));
 
-    vTaskDelay(pdMS_TO_TICKS(1));
+    vTaskDelay(pdMS_TO_TICKS(20));
 }
 
 void read_sgp30()
@@ -163,9 +163,13 @@ float calculate_absolute_humidity(float temperature, float relative_humidity)
 {
     // Bound check incoming relative humidity to stay within safe physical bounds
     if (relative_humidity > 100.0f)
+    {
         relative_humidity = 100.0f;
+    }
     if (relative_humidity < 0.0f)
+    {
         relative_humidity = 0.0f;
+    }
 
     float numerator = (relative_humidity / 100.0f) * 6.112f * expf((17.62f * temperature) / (243.12f + temperature));
     float denominator = 273.15f + temperature;
@@ -185,7 +189,7 @@ void read_bme280()
     float humidity = 0.0;
     float pressure = 0.0;
 
-    if (bmx280_readout_float(_bmx280, &temperature, &pressure, &humidity) == ESP_OK)
+    if (bmx280_readout(_bmx280, &temperature, &pressure, &humidity) == ESP_OK)
     {
         sensor_data_t sensor_data;
 
@@ -200,6 +204,8 @@ void read_bme280()
         float absolute_humidity = calculate_absolute_humidity(temperature, humidity);
 
         ESP_ERROR_CHECK_WITHOUT_ABORT(sgp30_set_humidity(absolute_humidity));
+
+        xSemaphoreGive(_sensor_data_sem);
     }
     else
     {

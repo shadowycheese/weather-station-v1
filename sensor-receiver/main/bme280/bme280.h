@@ -48,37 +48,7 @@ extern "C"
     extern esp_err_t bmx280_getMode(bmx280_t *bmx280, bmx280_mode_t *mode);
     extern bool bmx280_isSampling(bmx280_t *bmx280);
 
-    extern esp_err_t bmx280_readout(bmx280_t *bmx280, int32_t *temperature, uint32_t *pressure, uint32_t *humidity);
-
-    static inline void bmx280_readout2float(int32_t *tin, uint32_t *pin, uint32_t *hin, float *tout, float *pout, float *hout)
-    {
-        if (tin && tout)
-        {
-            *tout = (float)*tin * 0.01f;
-        }
-        if (pin && pout)
-        {
-            *pout = (float)*pin * (1.0f / 256.0f);
-        }
-        if (hin && hout)
-        {
-            *hout = (*hin == UINT32_MAX) ? -1.0f : (float)*hin * (1.0f / 1024.0f);
-        }
-    }
-
-    static inline esp_err_t bmx280_readout_float(bmx280_t *bmx280, float *temperature, float *pressure, float *humidity)
-    {
-        int32_t t;
-        uint32_t p, h;
-        esp_err_t err = bmx280_readout(bmx280, &t, &p, &h);
-
-        if (err == ESP_OK)
-        {
-            bmx280_readout2float(&t, &p, &h, temperature, pressure, humidity);
-        }
-
-        return err;
-    }
+    extern esp_err_t bmx280_readout(bmx280_t *bmx280, float *temperature, float *pressure, float *humidity);
 
 #ifdef __cplusplus
 };
