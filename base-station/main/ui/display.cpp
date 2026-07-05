@@ -9,7 +9,6 @@
 #include "esp_log.h"
 #include "esp_memory_utils.h"
 #include "lv.hpp"
-#include "lv_demos.h"
 #include "lvgl.h"
 #include "nvs.h"
 #include "nvs_flash.h"
@@ -38,8 +37,6 @@ void Display::start()
 
     bsp_display_backlight_on();
 
-    //_parent = lv_screen_active();
-
     bsp_display_lock(-1);
 
     init_ui();
@@ -49,56 +46,24 @@ void Display::start()
 
 void Display::init_ui()
 {
-    auto active_screen = lv::screen_active();
-
-    // Allocate on the heap so the event handler stays alive in memory
-    auto root = lv::vbox(active_screen)
-                    .bg_color(lv_color_black())
-                    .fill()           // Fill the entire parent screen
-                    .center_content() // Center items horizontally and vertically
-                    .gap(20);         // Add 20px of vertical space between each label
-
-    _logMessages = lv::Textarea::create(root)
+    _logMessages = lv::Textarea::create(NULL)
                        .width(720)
                        .height(1280)
                        .align(LV_ALIGN_TOP_LEFT);
 
-    // 2. Add 4 large labels to the root layout container
-    // Note: LVGL 9 utilizes the default system font scales (e.g., large/large)
-    _labelTemp = lv::Label::create(root)
-                     .text("Sensor Reading 1")
-                     .font(&lv_font_montserrat_26) // Use a large built-in font size
-                     .center()
-                     .visible(false);
+    lv_screen_load(_logMessages);
 
-    _labelHumidity = lv::Label::create(root)
-                         .text("Sensor Reading 2")
-                         .font(&lv_font_montserrat_26)
-                         .center()
-                         .visible(false);
-
-    _labelPressure = lv::Label::create(root)
-                         .text("Sensor Reading 3")
-                         .font(&lv_font_montserrat_26)
-                         .center()
-                         .visible(false);
-
-    _labelUV = lv::Label::create(root)
-                   .text("Battery Level")
-                   .font(&lv_font_montserrat_26)
-                   .center()
-                   .visible(false);
+    _mainPanel = lv::vbox((lv::ObjectView)((lv_obj_t *)NULL))
+                     .width(720)
+                     .height(1280)
+                     .align(LV_ALIGN_TOP_LEFT);
 }
 
 void Display::set_boot_complete()
 {
     bsp_display_lock(-1);
 
-    _logMessages.visible(false);
-    _labelTemp.visible(true);
-    _labelHumidity.visible(true);
-    _labelPressure.visible(true);
-    _labelUV.visible(true);
+    lv_screen_load(_mainPanel);
 
     bsp_display_unlock();
 }
@@ -111,24 +76,4 @@ void Display::log_message(log_level_t log_level, const char *message)
     _instance->_logMessages.add_text("\n");
 
     bsp_display_unlock();
-}
-
-void Display::setValues(char *temp, char *hum, char *pres, char *uv)
-{
-    if (temp)
-    {
-        _labelTemp.text(temp);
-    }
-    if (hum)
-    {
-        _labelHumidity.text(hum);
-    }
-    if (pres)
-    {
-        _labelPressure.text(pres);
-    }
-    if (uv)
-    {
-        _labelUV.text(uv);
-    }
 }

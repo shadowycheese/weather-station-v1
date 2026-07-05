@@ -23,9 +23,9 @@
 #define UART_SPEED 460800
 
 #define TICK_INTERVAL 1000
-#define BME280_TICKS_PER_SEND 1
+#define BME280_TICKS_PER_SEND 10
 #define SGP30_TICKS_BEFORE_READ 15
-#define SGP30_TICKS_PER_SEND 1
+#define SGP30_TICKS_PER_SEND 10
 
 #define I2C_SDA_IO GPIO_NUM_4
 #define I2C_SCL_IO GPIO_NUM_5
@@ -138,10 +138,6 @@ void read_sgp30()
         return;
     }
 
-    sensor_data_t data = {};
-    data.battery_mv = 0;
-    data.sensor_id = SENSOR_AQ_INSIDE;
-
     uint16_t co2 = 0;
     uint16_t tvoc = 0;
     if (sgp30_read_measurements(&co2, &tvoc) == ESP_OK)
@@ -151,6 +147,9 @@ void read_sgp30()
             return;
         }
 
+        sensor_data_t data = {};
+        data.battery_mv = -1;
+        data.sensor_id = SENSOR_AQ_INSIDE;
         data.reading1 = (float)co2;
         data.reading2 = (float)tvoc;
 

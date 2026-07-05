@@ -20,11 +20,8 @@ public:
     static void boot_message(uint8_t level, const char *message);
 
 private:
-    lv::Label _labelTemp;
-    lv::Label _labelHumidity;
-    lv::Label _labelPressure;
-    lv::Label _labelUV;
     lv::Textarea _logMessages;
+    lv::ObjectView _mainPanel;
 
     void init_ui();
 

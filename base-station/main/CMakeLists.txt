@@ -3,6 +3,8 @@ idf_component_register(
         main.cpp 
         log/log.cpp
         ui/display.cpp
+        ui/header.cpp
+        ui/outside-temp.cpp
         ui/edt.cpp
         data/remote-sensor.cpp
         data/db.cpp

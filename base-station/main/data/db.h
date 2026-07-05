@@ -4,38 +4,17 @@
 #include <stdint.h>
 #include <time.h>
 #include "models.h"
-
-typedef enum : uint16_t
-{
-    DATA_BATTERY,
-    DATA_TEMPERATURE,
-    DATA_PRESSURE,
-    DATA_HUMIDITY,
-    DATA_AQ_VOC,
-    DATA_AQ_PMX,
-    DATA_UV,
-    DATA_RAIN,
-    DATA_MAX
-} data_type_t;
-
-typedef struct
-{
-    time_t timestamp;
-    sensor_id_t sensor_id;
-    data_type_t data_type;
-    float max;
-    float min;
-    float average;
-} __attribute__((packed)) timeseries_data_t;
+#include "metrics.h"
+#include "edt.h"
 
 class Db
 {
 public:
     Db();
 
-    timeseries_data_t get_latest(sensor_id_t sensor_id, data_type_t data_type)
+    timeseries_data_t get_latest(sensor_id_t sensor_id, metric_id_t metric_id)
     {
-        return _latest[sensor_id][data_type];
+        return _latest[metric_id];
     }
 
     void init();
@@ -45,16 +24,54 @@ public:
 private:
     void update(sensor_data_t *sensor_data);
 
-    timeseries_data_t to_time_series_data(sensor_data_t *sensor_data, data_type_t data_type, float value);
+    metric_event_t update_time_series_data(sensor_data_t *sensor_data, metric_id_t metric_id, float value);
 
-    // timeseries_data_t _latest[SENSOR_COUNT][DATA_MAX];
-    timeseries_data_t _latest[1][DATA_MAX];
+    float calculate_inside_aqi();
+
+    float calculate_uvi();
+
+    float calculate_rainfall(int in_last_seconds);
+
+    timeseries_data_t _latest[METRIC_COUNT];
+    timeseries_data_t _24h_high[METRIC_COUNT];
+    timeseries_data_t _24h_low[METRIC_COUNT];
     timeseries_data_t *_unbucketed;
     timeseries_data_t *_24_hours;
     timeseries_data_t *_7_days;
     timeseries_data_t *_90_days;
 
     static Db *_instance;
+
+    const sensor_id_t _metric_map[METRIC_COUNT - 1] = {
+        SENSOR_INSIDE_BME280,
+        SENSOR_INSIDE_BME280,
+        SENSOR_INSIDE_BME280,
+        SENSOR_INSIDE_SGP30,
+        SENSOR_INSIDE_SGP30,
+        SENSOR_INSIDE_SGP30,
+        SENSOR_OUTSIDE1_BME280,
+        SENSOR_OUTSIDE1_BME280,
+        SENSOR_OUTSIDE1_BME280,
+        SENSOR_OUTSIDE1_BME280,
+        SENSOR_OUTSIDE_UV,
+        SENSOR_OUTSIDE_UV,
+        SENSOR_OUTSIDE_UV,
+        SENSOR_OUTSIDE_SPS30_SET1,
+        SENSOR_OUTSIDE_SPS30_SET1,
+        SENSOR_OUTSIDE_SPS30_SET1,
+        SENSOR_OUTSIDE_SPS30_SET2,
+        SENSOR_OUTSIDE_SPS30_SET2,
+        SENSOR_OUTSIDE_SPS30_SET2,
+        SENSOR_OUTSIDE_SPS30_SET3,
+        SENSOR_OUTSIDE_SPS30_SET3,
+        SENSOR_OUTSIDE_SPS30_SET3,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+        SENSOR_OUTSIDE_RAIN_GAUGE,
+    };
 };
 
 #endif

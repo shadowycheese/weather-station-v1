@@ -1,6 +1,7 @@
 #include "data/remote-sensor.h"
 #include "ui/edt.h"
 #include "esp_log.h"
+#include "log/log.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "espio.h"
@@ -52,10 +53,7 @@ void sensor_uart_isr(void *_)
 
 void uart_read()
 {
-    edt_job_t job = {};
-
-    job.type = JOB_TYPE_SENSOR_DATA;
-    job.payload.sensor_data = {};
+    sensor_data_t sensor_data = {};
 
     static uint8_t uart_rx_buffer[BUF_SIZE];
 
@@ -68,11 +66,9 @@ void uart_read()
         uart_rx_buffer[bytes_read] = '\0';
     }
 
-    memcpy(&job.payload.sensor_data, uart_rx_buffer, sizeof(sensor_data_t));
+    memcpy(&sensor_data, uart_rx_buffer, sizeof(sensor_data_t));
 
-    Db::handle_sensor_data(job.payload.sensor_data);
-
-    edt_post(job);
+    Db::handle_sensor_data(sensor_data);
 }
 
 void uart_task(void *pvParameters)
