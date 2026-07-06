@@ -149,7 +149,7 @@ void read_sgp30()
 
         sensor_data_t data = {};
         data.battery_mv = -1;
-        data.sensor_id = SENSOR_AQ_INSIDE;
+        data.sensor_id = SENSOR_INSIDE_SGP30;
         data.reading1 = (float)co2;
         data.reading2 = (float)tvoc;
 
@@ -193,7 +193,7 @@ void read_bme280()
     {
         sensor_data_t sensor_data;
 
-        sensor_data.sensor_id = SENSOR_TEMP_INSIDE;
+        sensor_data.sensor_id = SENSOR_INSIDE_BME280;
         sensor_data.reading1 = temperature;
         sensor_data.reading2 = humidity;
         sensor_data.reading3 = pressure;
