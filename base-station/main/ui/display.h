@@ -3,6 +3,9 @@
 
 #include "lv.hpp"
 #include "log/log.h"
+#include "ui/core/card.h"
+#include "ui/header.h"
+#include "ui/outside-temp.h"
 
 class Display
 {
@@ -15,15 +18,16 @@ public:
 
     void set_boot_complete();
 
-    void setValues(char *temp, char *hum, char *pres, char *uv);
-
-    static void boot_message(uint8_t level, const char *message);
-
 private:
+    void init_ui();
+
     lv::Textarea _logMessages;
     lv::ObjectView _mainPanel;
 
-    void init_ui();
+    Header _header;
+    OutsideTemp _outsideTemp;
+
+    Card *_cards[2] = {&_header, &_outsideTemp};
 
     static Display *_instance;
 };

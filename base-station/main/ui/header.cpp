@@ -1,36 +1,34 @@
 #include "lv.hpp"
 #include "lvgl.h"
 #include "ui/core/card.h"
-#include "header.h"
+#include "ui/header.h"
+#include "ui/theme.h"
+#include "ui/ui-helpers.h"
+
+Header::Header()
+{
+}
 
 void Header::init(lv::ObjectView parent)
 {
-    // Allocate on the heap so the event handler stays alive in memory
-    auto root = lv::vbox(parent)
-                    .bg_color(lv_color_black())
-                    .border_width(0)
-                    .outline_width(0)
-                    .radius(0)
-                    .gap(20)
-                    .height(80)
-                    .width(720);
+    lv::Flex root = create_box(parent, SCREEN_WIDTH, 80);
 
     _labelTime = lv::Label::create(root)
                      .text("00:00:00")
-                     .font(&lv_font_montserrat_26) // Use a large built-in font size
-                     .text_color(lv_color_white());
+                     .font(FONT_24PT)
+                     .text_color(COL_TEXT_PRIMARY);
 
     _labelDate = lv::Label::create(root)
                      .text("03 JUL 2026")
-                     .font(&lv_font_montserrat_24) // Use a large built-in font size
-                     .text_color(lv_color_white());
+                     .font(FONT_24PT)
+                     .text_color(COL_TEXT_SECONDARY);
 
     _labelWifi = lv::Label::create(root)
                      .text("WIFI")
-                     .font(&lv_font_montserrat_24) // Use a large built-in font size
-                     .text_color(lv_color_white());
+                     .font(FONT_24PT)
+                     .text_color(COL_TEXT_SECONDARY);
     _labelStatus = lv::Label::create(root)
                        .text("STATUS")
-                       .font(&lv_font_montserrat_24) // Use a large built-in font size
-                       .text_color(lv_color_white());
+                       .font(FONT_24PT) // Use a large built-in font size
+                       .text_color(COL_TEXT_SECONDARY);
 };

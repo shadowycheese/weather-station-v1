@@ -2,21 +2,23 @@ idf_component_register(
     SRCS 
         main.cpp 
         log/log.cpp
+        events/edt.cpp
+        metrics/remote-sensor.cpp
+        metrics/metrics-repo.cpp
+        ui/theme.cpp
+        ui/ui-helpers.cpp
         ui/display.cpp
         ui/header.cpp
         ui/outside-temp.cpp
-        ui/edt.cpp
-        data/remote-sensor.cpp
-        data/db.cpp
         net/network.cpp
+        ui/fonts/montserrat36.c
+        ui/fonts/montserrat48.c
+        ui/fonts/montserrat72.c
         ../../shared-components/core/src/espio.c
          ../../shared-components/core/src/espuart.c
    INCLUDE_DIRS 
         "../../shared-components/core/include"
         "${CMAKE_CURRENT_LIST_DIR}"
-        "${CMAKE_CURRENT_LIST_DIR}/ui"      
-        "${CMAKE_CURRENT_LIST_DIR}/net"      
-        "${CMAKE_CURRENT_LIST_DIR}/data"      
         "../components/lvgl_wrapper"         
         "../components/bsp_extra/include"          
     PRIV_REQUIRES 

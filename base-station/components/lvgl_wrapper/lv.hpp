@@ -311,59 +311,68 @@
  * LVGL is single-threaded. All lv:: operations must be called
  * from the same thread as lv_timer_handler().
  */
-namespace lv {
+namespace lv
+{
 
-// ==================== Version Info ====================
+    // ==================== Version Info ====================
 
-/// Library version
-constexpr int VERSION_MAJOR = 0;
-constexpr int VERSION_MINOR = 1;
-constexpr int VERSION_PATCH = 0;
+    /// Library version
+    constexpr int VERSION_MAJOR = 0;
+    constexpr int VERSION_MINOR = 1;
+    constexpr int VERSION_PATCH = 0;
 
-/// Get version string
-constexpr const char* version() noexcept {
-    return "0.1.0";
-}
+    /// Get version string
+    constexpr const char *version() noexcept
+    {
+        return "0.1.0";
+    }
 
-// Screen helpers are provided by core/screen.hpp
+    // Screen helpers are provided by core/screen.hpp
 
-/// Get the layer_top (always on top)
-inline ObjectRef layer_top() noexcept {
-    return ObjectRef(lv_layer_top());
-}
+    /// Get the layer_top (always on top)
+    inline ObjectRef layer_top() noexcept
+    {
+        return ObjectRef(lv_layer_top());
+    }
 
-/// Get the layer_sys (system layer)
-inline ObjectRef layer_sys() noexcept {
-    return ObjectRef(lv_layer_sys());
-}
+    /// Get the layer_sys (system layer)
+    inline ObjectRef layer_sys() noexcept
+    {
+        return ObjectRef(lv_layer_sys());
+    }
 
-// ==================== Display Helpers ====================
+    // ==================== Display Helpers ====================
 
-/// Get default display width
-inline int32_t display_width() noexcept {
-    return lv_display_get_horizontal_resolution(lv_display_get_default());
-}
+    /// Get default display width
+    inline int32_t display_width() noexcept
+    {
+        return lv_display_get_horizontal_resolution(lv_display_get_default());
+    }
 
-/// Get default display height
-inline int32_t display_height() noexcept {
-    return lv_display_get_vertical_resolution(lv_display_get_default());
-}
+    /// Get default display height
+    inline int32_t display_height() noexcept
+    {
+        return lv_display_get_vertical_resolution(lv_display_get_default());
+    }
 
-// ==================== Timer/Task Helpers ====================
+    // ==================== Timer/Task Helpers ====================
 
-/// Run LVGL timer handler (call periodically)
-inline uint32_t timer_handler() noexcept {
-    return lv_timer_handler();
-}
+    /// Run LVGL timer handler (call periodically)
+    inline uint32_t timer_handler() noexcept
+    {
+        return lv_timer_handler();
+    }
 
-/// Get elapsed milliseconds
-inline uint32_t tick_get() noexcept {
-    return lv_tick_get();
-}
+    /// Get elapsed milliseconds
+    inline uint32_t tick_get() noexcept
+    {
+        return lv_tick_get();
+    }
 
-/// Advance LVGL tick by given milliseconds (for testing or custom tick sources)
-inline void tick_inc(uint32_t ms) noexcept {
-    lv_tick_inc(ms);
-}
+    /// Advance LVGL tick by given milliseconds (for testing or custom tick sources)
+    inline void tick_inc(uint32_t ms) noexcept
+    {
+        lv_tick_inc(ms);
+    }
 
 } // namespace lv

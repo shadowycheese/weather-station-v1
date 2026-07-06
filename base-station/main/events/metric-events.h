@@ -1,10 +1,13 @@
-#ifndef Event_h
-#define Event_h
+#ifndef Metric_Events_h
+#define Metric_Events_h
 
 #include <stdint.h>
 #include <time.h>
 
 #include "models.h"
+
+#define IS_24_HR_LOW 0x0001
+#define IS_24_HR_HIGH 0x0002
 
 typedef enum : uint16_t
 {
@@ -42,13 +45,6 @@ typedef enum : uint16_t
 
 typedef struct
 {
-    metric_id_t metric_id;
-    uint16_t attributes;
-    float value;
-} metric_event_t;
-
-typedef struct
-{
     time_t timestamp;
     sensor_id_t sensor_id;
     metric_id_t metric_id;
@@ -56,5 +52,12 @@ typedef struct
     float min;
     float average;
 } __attribute__((packed)) timeseries_data_t;
+
+typedef struct
+{
+    metric_id_t metric_id;
+    uint16_t attributes;
+    float value;
+} metric_event_t;
 
 #endif

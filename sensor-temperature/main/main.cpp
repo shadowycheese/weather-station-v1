@@ -86,7 +86,7 @@ extern "C" void app_main(void)
     float humidity = 0.0;
     float pressure = 0.0;
 
-    sensor_data.sensor_id = SENSOR_TEMP_OUTSIDE1;
+    sensor_data.sensor_id = SENSOR_OUTSIDE1_BME280;
 
     for (;;)
     {
@@ -97,7 +97,7 @@ extern "C" void app_main(void)
             sensor_data.reading3 = pressure;
             sensor_data.battery_mv = -1;
 
-            ieee_802154_transmit_sensor_data(SENSOR_TEMP_OUTSIDE1, &sensor_data);
+            ieee_802154_transmit_sensor_data(SENSOR_OUTSIDE1_BME280, &sensor_data);
 
             // Give the radio some time
             vTaskDelay(pdMS_TO_TICKS(20));

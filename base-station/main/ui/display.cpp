@@ -1,22 +1,9 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "bsp/display.h"
 #include "display.h"
 #include "bsp/esp-bsp.h"
-#include "bsp_board_extra.h"
-#include "esp_check.h"
-#include "esp_err.h"
-#include "esp_log.h"
-#include "esp_memory_utils.h"
 #include "lv.hpp"
 #include "lvgl.h"
-#include "nvs.h"
-#include "nvs_flash.h"
-#include "esp_wifi.h"
-#include "esp_netif.h"
-#include "esp_sntp.h"
 #include "models.h"
-#include "edt.h"
+#include "ui/ui-helpers.h"
 
 Display *Display::_instance = NULL;
 
@@ -47,16 +34,18 @@ void Display::start()
 void Display::init_ui()
 {
     _logMessages = lv::Textarea::create(NULL)
-                       .width(720)
-                       .height(1280)
+                       .width(SCREEN_WIDTH)
+                       .height(SCREEN_HEIGHT)
                        .align(LV_ALIGN_TOP_LEFT);
 
     lv_screen_load(_logMessages);
 
-    _mainPanel = lv::vbox((lv::ObjectView)((lv_obj_t *)NULL))
-                     .width(720)
-                     .height(1280)
-                     .align(LV_ALIGN_TOP_LEFT);
+    _mainPanel = create_box(NULL, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    for (int i = 0; i < 2; i++)
+    {
+        _cards[i]->init(_mainPanel);
+    }
 }
 
 void Display::set_boot_complete()

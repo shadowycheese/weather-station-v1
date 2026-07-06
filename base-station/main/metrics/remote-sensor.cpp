@@ -1,12 +1,11 @@
-#include "data/remote-sensor.h"
-#include "ui/edt.h"
 #include "esp_log.h"
 #include "log/log.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "espio.h"
 #include "espuart.h"
-#include "data/db.h"
+#include "metrics/remote-sensor.h"
+#include "metrics/metrics-repo.h"
 
 static const char *TAG = "REMOTE-SENSOR";
 
@@ -68,7 +67,7 @@ void uart_read()
 
     memcpy(&sensor_data, uart_rx_buffer, sizeof(sensor_data_t));
 
-    Db::handle_sensor_data(sensor_data);
+    MetricsRepository::handle_sensor_data(sensor_data);
 }
 
 void uart_task(void *pvParameters)

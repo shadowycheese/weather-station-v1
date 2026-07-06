@@ -15,16 +15,16 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "ui/display.h"
-#include "ui/edt.h"
-#include "data/remote-sensor.h"
-#include "data/db.h"
+#include "events/edt.h"
+#include "metrics/remote-sensor.h"
+#include "metrics/metrics-repo.h"
 #include "net/network.h"
 #include "log/log.h"
 
 const char *TAG = "APP";
 
 Display display;
-Db data;
+MetricsRepository metrics_repo;
 
 extern "C" void app_main(void)
 {
