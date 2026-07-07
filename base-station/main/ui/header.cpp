@@ -22,7 +22,7 @@ void Header::init(lv::ObjectView parent)
                      .font(FONT_24PT)
                      .text_color(COL_TEXT_SECONDARY);
 
-    edt_add_system_event_handler(SYSTEM_EVENT_TIME_UPDATED, [this](system_event_t m)
+    edt_add_system_event_handler(SYSTEM_EVENT_TICK, [this](system_event_t m)
                                  {
                                      char ts[10], ds[24];
 

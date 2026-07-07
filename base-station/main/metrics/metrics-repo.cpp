@@ -1,6 +1,7 @@
 #include "esp_heap_caps.h"
 #include "events/edt.h"
 #include "metrics/metrics-repo.h"
+#include "log/debug.h"
 
 MetricsRepository *MetricsRepository::_instance = NULL;
 
@@ -48,6 +49,8 @@ void MetricsRepository::handle_sensor_data(sensor_data_t sensor_data)
 
 void MetricsRepository::update(sensor_data_t *sd)
 {
+    debug_sensor("REPO", sd);
+
     (this->*_sensor_updates[sd->sensor_id])(sd);
 }
 
@@ -163,9 +166,10 @@ void MetricsRepository::update_time_series_data(sensor_data_t *sensor_data, metr
         .value = value,
     };
 
-    edt_job_t job = {};
-    job.type = JOB_TYPE_METRIC_EVENT;
-    job.metric_event = event;
+    edt_job_t job = {
+        .type = JOB_TYPE_METRIC_EVENT,
+        .metric_event = event,
+    };
 
     edt_post(job);
 }

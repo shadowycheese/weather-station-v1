@@ -15,6 +15,7 @@ extern "C"
 {
 #endif
     void app_log(log_level_t level, const char *tag, const char *format, ...);
+
 #ifdef __cplusplus
 }
 #endif

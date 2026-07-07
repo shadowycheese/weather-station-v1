@@ -64,12 +64,12 @@ void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_any_id));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip));
 
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = WIFI_SSID,
-            .password = WIFI_PASSPHRASE,
-        },
-    };
+    wifi_sta_config_t sta_config = {};
+    strncpy((char *)sta_config.ssid, WIFI_SSID, sizeof(sta_config.ssid));
+    strncpy((char *)sta_config.password, WIFI_PASSPHRASE, sizeof(sta_config.password));
+
+    wifi_config_t wifi_config = {};
+    wifi_config.sta = sta_config;
 
     app_log(LOG_INFO, TAG, "Configuring WIFI");
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));

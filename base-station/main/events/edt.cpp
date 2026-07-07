@@ -4,6 +4,7 @@
 #include "bsp/esp-bsp.h"
 #include "bsp_board_extra.h"
 #include "events/edt.h"
+#include "log/debug.h"
 
 static QueueHandle_t _edt_job_queue = NULL;
 
@@ -90,6 +91,10 @@ public:
             {
                 _metric_callbacks[metric_event.metric_id][i](metric_event);
             }
+            else
+            {
+                break;
+            }
         }
     }
 
@@ -106,6 +111,10 @@ public:
             if (_event_callbacks[system_event.event_id][i])
             {
                 _event_callbacks[system_event.event_id][i](system_event);
+            }
+            else
+            {
+                break;
             }
         }
     }
@@ -175,7 +184,7 @@ void edt_timer_task(void *pvParameters)
         },
     };
 
-    const TickType_t delay_period = pdMS_TO_TICKS(900);
+    const TickType_t delay_period = pdMS_TO_TICKS(1000);
 
     TickType_t last_wake_time = xTaskGetTickCount();
 

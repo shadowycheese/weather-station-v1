@@ -8,5 +8,6 @@ set(EXTRA_COMPONENT_DIRS
     ./components/bsp_extra
     )
 
+idf_build_set_property(MINIMAL_BUILD ON)
 add_compile_options(-Wno-format)
 project(base-station)
