@@ -12,6 +12,26 @@ class EventDispatcher
 public:
     static const size_t MAX_LISTENERS = 8;
 
+    void init()
+    {
+        size_t metric_bytes = METRIC_COUNT * MAX_LISTENERS * sizeof(metric_event_handler_t);
+
+        _metric_callbacks = (metric_event_handler_t(*)[MAX_LISTENERS])heap_caps_malloc(metric_bytes, MALLOC_CAP_SPIRAM);
+
+        size_t event_bytes = SYSTEM_EVENT_COUNT * MAX_LISTENERS * sizeof(system_event_handler_t);
+
+        _event_callbacks = (system_event_handler_t(*)[MAX_LISTENERS])heap_caps_malloc(event_bytes, MALLOC_CAP_SPIRAM);
+
+        if (_metric_callbacks == NULL || _event_callbacks == NULL)
+        {
+            ESP_LOGE("MEM", "Failed to allocate callback arrays in PSRAM!");
+            return;
+        }
+
+        memset(_metric_callbacks, 0, metric_bytes);
+        memset(_event_callbacks, 0, event_bytes);
+    }
+
     bool add_metric_event_handler(metric_id_t metric_id, metric_event_handler_t cb)
     {
         if (metric_id >= METRIC_COUNT)
@@ -91,8 +111,8 @@ public:
     }
 
 private:
-    metric_event_handler_t _metric_callbacks[METRIC_COUNT][MAX_LISTENERS];
-    system_event_handler_t _event_callbacks[SYSTEM_EVENT_COUNT][MAX_LISTENERS];
+    metric_event_handler_t (*_metric_callbacks)[MAX_LISTENERS];
+    system_event_handler_t (*_event_callbacks)[MAX_LISTENERS];
 };
 
 EventDispatcher _event_dispatcher;
@@ -169,7 +189,9 @@ void edt_timer_task(void *pvParameters)
 
 void edt_init()
 {
-    _edt_job_queue = xQueueCreate(256, sizeof(edt_job_t));
+    _edt_job_queue = xQueueCreate(128, sizeof(edt_job_t));
+
+    _event_dispatcher.init();
 
     xTaskCreatePinnedToCore(edt_task, "edt_task", 8192, NULL, 2, NULL, 1);
     xTaskCreatePinnedToCore(edt_timer_task, "edt_timer_tick_task", 1024, NULL, 2, NULL, 1);

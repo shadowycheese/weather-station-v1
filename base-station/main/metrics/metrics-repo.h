@@ -53,9 +53,9 @@ private:
         &MetricsRepository::update_outside_rain_gauge,
     };
 
-    timeseries_data_t _latest[METRIC_COUNT];
-    timeseries_data_t _24h_high[METRIC_COUNT];
-    timeseries_data_t _24h_low[METRIC_COUNT];
+    timeseries_data_t *_latest;
+    timeseries_data_t *_24h_high;
+    timeseries_data_t *_24h_low;
     timeseries_data_t *_unbucketed;
     timeseries_data_t *_24_hours;
     timeseries_data_t *_7_days;

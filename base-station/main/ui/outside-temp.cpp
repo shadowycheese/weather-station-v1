@@ -39,8 +39,6 @@ void OutsideTemp::init(lv::ObjectView parent)
 
                                      snprintf(temp, 10, "%0.1f", m.value);
 
-                                     printf("RX: %s\n", temp);
-
                                      _mainTemperature.span_text(_temperatureElement, temp); //
                                  });
 }

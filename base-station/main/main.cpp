@@ -20,6 +20,7 @@
 #include "metrics/metrics-repo.h"
 #include "net/network.h"
 #include "log/log.h"
+#include "net/forecast.h"
 
 const char *TAG = "APP";
 
@@ -34,12 +35,16 @@ extern "C" void app_main(void)
 
     display.start();
 
-    // wifi_init();
+    metrics_repo.init();
+
+    wifi_init();
 
     app_log(LOG_INFO, TAG, "Starting GPIO ISR service");
     gpio_install_isr_service(0);
 
     remote_sensor_read_start();
+
+    // forecast_init();
 
     display.set_boot_complete();
 }

@@ -11,6 +11,7 @@ typedef enum : uint16_t
     SYSTEM_EVENT_TICK,
     SYSTEM_EVENT_TIME_UPDATED,
     SYSTEM_EVENT_WIFI_STATUS,
+    SYSTEM_EVENT_FORECAST,
     SYSTEM_EVENT_COUNT,
 } system_event_id_t;
 

@@ -92,7 +92,6 @@ extern "C"
 {
     void remote_sensor_read_start()
     {
-        // ---- A. Configure UART Peripherals ----
         start_uart(H2_UART_PORT, H2_TX_PIN, H2_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, BUF_SIZE * 2, UART_SPEED);
 
         _sensor_job_queue = xQueueCreate(256, sizeof(sensor_job_t));

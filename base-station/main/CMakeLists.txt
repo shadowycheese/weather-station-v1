@@ -11,9 +11,6 @@ idf_component_register(
         ui/header.cpp
         ui/outside-temp.cpp
         net/network.cpp
-        ui/fonts/montserrat36.c
-        ui/fonts/montserrat48.c
-        ui/fonts/montserrat72.c
         ../../shared-components/core/src/espio.c
          ../../shared-components/core/src/espuart.c
    INCLUDE_DIRS 

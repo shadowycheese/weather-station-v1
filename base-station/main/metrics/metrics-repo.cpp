@@ -12,6 +12,13 @@ MetricsRepository *MetricsRepository::_instance = NULL;
 MetricsRepository::MetricsRepository()
 {
     _instance = this;
+}
+
+void MetricsRepository::init()
+{
+    _latest = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * METRIC_COUNT, MALLOC_CAP_SPIRAM);
+    _24h_high = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * METRIC_COUNT, MALLOC_CAP_SPIRAM);
+    _24h_low = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * METRIC_COUNT, MALLOC_CAP_SPIRAM);
 
     for (int i = 0; i < METRIC_COUNT; i++)
     {
@@ -27,10 +34,7 @@ MetricsRepository::MetricsRepository()
         _latest[i].sensor_id = _metric_map[i];
         _latest[i].metric_id = (metric_id_t)i;
     }
-}
 
-void MetricsRepository::init()
-{
     //_unbucketed = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * 10000, MALLOC_CAP_SPIRAM);
     //_24_hours = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * 6000, MALLOC_CAP_SPIRAM);
     //_7_days = (timeseries_data_t *)heap_caps_malloc(sizeof(timeseries_data_t) * 500, MALLOC_CAP_SPIRAM);
