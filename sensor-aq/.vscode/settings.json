@@ -1,0 +1,21 @@
+{
+    "idf.toolsPath": "/home/alan/.espressif",
+    "idf.espIdfPath": "/home/alan/.espressif/v5.5.4/esp-idf",
+    "idf.currentSetup": "/home/alan/.espressif/v5.5.4/esp-idf",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/../shared-components/models/include"
+    ],
+    "C_Cpp.default.browse.path": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/../shared-components/models"
+    ],
+    "espIdf.customExtraComponents": [
+        "${workspaceFolder}/../shared-components"
+    ],
+    "editor.suggest.showInterfaces": true,
+    "editor.suggest.showProperties": true,
+    "editor.suggest.showVariables": true,
+    "editor.suggest.showStructs": true
+}

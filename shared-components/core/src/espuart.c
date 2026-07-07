@@ -8,7 +8,7 @@ esp_err_t start_uart(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_MODE_RS485_HALF_DUPLEX,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .source_clk = UART_SCLK_DEFAULT,
     };
 

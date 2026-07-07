@@ -144,9 +144,33 @@ void edt_task(void *pvParameters)
     }
 }
 
+void edt_timer_task(void *pvParameters)
+{
+    const edt_job_t job = {
+        .type = JOB_TYPE_SYSTEM_EVENT,
+        .system_event = {
+            .event_id = SYSTEM_EVENT_TICK,
+            .attributes = 0,
+            .value = 0,
+        },
+    };
+
+    const TickType_t delay_period = pdMS_TO_TICKS(900);
+
+    TickType_t last_wake_time = xTaskGetTickCount();
+
+    for (;;)
+    {
+        edt_post(job);
+
+        vTaskDelayUntil(&last_wake_time, delay_period);
+    }
+}
+
 void edt_init()
 {
     _edt_job_queue = xQueueCreate(256, sizeof(edt_job_t));
 
-    xTaskCreatePinnedToCore(edt_task, "edt_ui_task", 8192, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(edt_task, "edt_task", 8192, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(edt_timer_task, "edt_timer_tick_task", 1024, NULL, 2, NULL, 1);
 }
