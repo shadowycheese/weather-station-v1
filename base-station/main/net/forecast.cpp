@@ -1,36 +1,105 @@
 #include "net/forecast.h"
-/*
-#include "esp_http_client.h"
+
 #include "esp_log.h"
 #include "events/edt.h"
+#include "lwip/sockets.h"
+#include "lwip/netdb.h"
+#include "log/log.h"
 
-#define URL "http://api.open-meteo.com/v1/forecast?latitude=49.232&longitude=-122.459&daily=weather_code,temperature_2m_max,precipitation_probability_max,wind_speed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=2"
+#define HOST "api.open-meteo.com"
+#define GET "/v1/forecast?latitude=49.232&longitude=-122.459&daily=weather_code,temperature_2m_max,precipitation_probability_max,wind_speed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=2"
 
 static forecast_t _forecast;
 
 const char *FC_TAG = "FORECAST";
 
-esp_err_t http_event_handler(esp_http_client_event_t *evt)
+esp_err_t request_forecast()
 {
-    printf("%d\n", evt->data_len);
+    // Configure target server details and raw HTTP request text
+    const char *REQUEST = "GET /v1/forecast?latitude=49.232&longitude=-122.459&daily=weather_code,temperature_2m_max,precipitation_probability_max,wind_speed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=2 HTTP/1.1\r\n"
+                          "Host: api.open-meteo.com\r\n"
+                          "User-Agent: esp32-p4-app\r\n"
+                          "Connection: close\r\n"
+                          "\r\n";
+    const struct addrinfo hints = {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    };
+    struct addrinfo *res;
+    int s;
+
+    // 1. Resolve host name via DNS (uses existing lwip stack seamlessly)
+    int err = getaddrinfo(HOST, "80", &hints, &res);
+    if (err != 0 || res == NULL)
+    {
+        ESP_LOGE(FC_TAG, "DNS lookup failed err=%d", err);
+        return err;
+    }
+    else
+    {
+        ESP_LOGI(FC_TAG, "Found address %s", res->ai_addr->sa_data);
+    }
+
+    // 2. Allocate the socket dynamically from the wide-open main heap
+    s = socket(res->ai_family, res->ai_socktype, 0);
+    if (s < 0)
+    {
+        ESP_LOGE(FC_TAG, "Failed to allocate socket.");
+        return ESP_ERR_INVALID_STATE;
+        ;
+    }
+    else
+    {
+        ESP_LOGI(FC_TAG, "Socket created");
+    }
+
+    // 3. Connect to the server
+    if (connect(s, res->ai_addr, res->ai_addrlen) != 0)
+    {
+        ESP_LOGE(FC_TAG, "Socket connection failed");
+        close(s);
+        return ESP_ERR_INVALID_STATE;
+    }
+    else
+    {
+        ESP_LOGI(FC_TAG, "Socket connected");
+    }
+    freeaddrinfo(res); // Free addrinfo structure immediately to save RAM
+
+    // 4. Transmit the raw HTTP stream
+    if (write(s, REQUEST, strlen(REQUEST)) < 0)
+    {
+        ESP_LOGE(FC_TAG, "Socket write failed");
+        close(s);
+        return ESP_ERR_INVALID_STATE;
+    }
+    else
+    {
+        ESP_LOGI(FC_TAG, "Socket write complete");
+    }
+
+    // 5. Read incoming HTTP payload dynamically into a local buffer
+    char recv_buf[128];
+    int r;
+    do
+    {
+        bzero(recv_buf, sizeof(recv_buf));
+        r = read(s, recv_buf, sizeof(recv_buf) - 1);
+        if (r > 0)
+        {
+            // Print chunk data out or safely pass it to your display UI string buffers
+            printf("%s", recv_buf);
+        }
+    } while (r > 0);
+
+    // 6. Clean up resources completely
+    close(s);
 
     return ESP_OK;
 }
 
-esp_err_t request_forecast()
+void noop_task(void *pvParameters)
 {
-    esp_http_client_config_t config = {
-        .url = URL,
-        .method = HTTP_METHOD_GET,
-        .event_handler = http_event_handler,
-        .buffer_size = 1024,
-    };
-
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_err_t err = esp_http_client_perform(client);
-    ESP_ERROR_CHECK_WITHOUT_ABORT(err);
-
-    return err;
 }
 
 void request_forecast_task(void *pvParameters)
@@ -77,9 +146,10 @@ extern "C"
 
     esp_err_t forecast_init()
     {
-        xTaskCreatePinnedToCore(request_forecast_task, "edt_timer_tick_task", 1024, NULL, 2, NULL, 1);
+        app_log(LOG_INFO, FC_TAG, "Creating forecast task");
+
+        xTaskCreateWithCaps(request_forecast_task, "forecast_task", 8192, NULL, 2, NULL, MALLOC_CAP_INTERNAL);
 
         return ESP_OK;
     }
 }
-*/

@@ -12,6 +12,7 @@ idf_component_register(
         ui/header.cpp
         ui/outside-temp.cpp
         net/network.cpp
+        net/forecast.cpp
         ../../shared-components/core/src/espio.c
          ../../shared-components/core/src/espuart.c
    INCLUDE_DIRS 

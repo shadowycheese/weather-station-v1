@@ -44,7 +44,7 @@ extern "C" void app_main(void)
 
     remote_sensor_read_start();
 
-    // forecast_init();
+    forecast_init();
 
     display.set_boot_complete();
 }
