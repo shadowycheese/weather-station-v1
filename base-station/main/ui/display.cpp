@@ -4,6 +4,7 @@
 #include "lvgl.h"
 #include "models.h"
 #include "ui/ui-helpers.h"
+#include "ui/fonts/fonts.h"
 
 Display *Display::_instance = NULL;
 
@@ -26,6 +27,8 @@ void Display::start()
 
     bsp_display_lock(-1);
 
+    init_fonts();
+
     init_ui();
 
     bsp_display_unlock();
@@ -36,16 +39,19 @@ void Display::init_ui()
     _logMessages = lv::Textarea::create(NULL)
                        .width(SCREEN_WIDTH)
                        .height(SCREEN_HEIGHT)
+                       .font(&lv_font_montserrat_22)
                        .align(LV_ALIGN_TOP_LEFT);
 
     lv_screen_load(_logMessages);
 
-    _mainPanel = create_box(NULL, SCREEN_WIDTH, SCREEN_HEIGHT);
+    _mainPanel = create_vbox(NULL, SCREEN_WIDTH, SCREEN_HEIGHT).outline_width(0);
 
     for (int i = 0; i < 2; i++)
     {
         _cards[i]->init(_mainPanel);
     }
+
+    create_vbox(_mainPanel, SCREEN_WIDTH, 0).fill().bg_color(COL_CYAN);
 }
 
 void Display::set_boot_complete()

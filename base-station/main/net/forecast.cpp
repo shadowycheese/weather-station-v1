@@ -5,11 +5,16 @@
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
 #include "log/log.h"
+#include "events/edt.h"
 
 #define HOST "api.open-meteo.com"
 #define GET "/v1/forecast?latitude=49.232&longitude=-122.459&daily=weather_code,temperature_2m_max,precipitation_probability_max,wind_speed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=2"
 
+#define ONE_HOUR_TICKS pdMS_TO_TICKS(1ULL * 60ULL * 60ULL * 1000ULL)
+#define FIVE_MINS_TICKS pdMS_TO_TICKS(5ULL * 60ULL * 1000ULL)
+
 static forecast_t _forecast;
+static TaskHandle_t _forecast_task_handle = NULL;
 
 const char *FC_TAG = "FORECAST";
 
@@ -21,10 +26,10 @@ esp_err_t request_forecast()
                           "User-Agent: esp32-p4-app\r\n"
                           "Connection: close\r\n"
                           "\r\n";
-    const struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-    };
+    struct addrinfo hints = {};
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
     struct addrinfo *res;
     int s;
 
@@ -113,24 +118,39 @@ void request_forecast_task(void *pvParameters)
         },
     };
 
-    const TickType_t delay_period = pdMS_TO_TICKS(1000 * 60 * 60); // Hourly
-    const TickType_t delay_period_err = pdMS_TO_TICKS(1000 * 5);   // Every 5s
-
-    TickType_t last_wake_time = xTaskGetTickCount();
+    TickType_t last_fetch_tick = 0;
+    uint32_t notification_value;
+    TickType_t next_wake_time = ONE_HOUR_TICKS;
 
     for (;;)
     {
+        BaseType_t from_event = xTaskNotifyWait(0x00, ULONG_MAX, &notification_value, next_wake_time);
+
+        TickType_t current_tick = xTaskGetTickCount();
+
+        if (from_event)
+        {
+            if ((last_fetch_tick != 0) || ((current_tick - last_fetch_tick) < ONE_HOUR_TICKS))
+            {
+                ESP_LOGI(FC_TAG, "Wifi connected, but have up to date forecast already");
+
+                next_wake_time = ONE_HOUR_TICKS - (current_tick - last_fetch_tick);
+
+                continue;
+            }
+        }
+
         esp_err_t err = request_forecast();
 
         if (err == ESP_OK)
         {
             edt_post(job);
-            vTaskDelayUntil(&last_wake_time, delay_period);
+            next_wake_time = ONE_HOUR_TICKS;
         }
         else
         {
             ESP_LOGW(FC_TAG, "Failed to get forecast: %d", err);
-            vTaskDelayUntil(&last_wake_time, delay_period_err);
+            next_wake_time = FIVE_MINS_TICKS;
         }
     }
 }
@@ -148,7 +168,18 @@ extern "C"
     {
         app_log(LOG_INFO, FC_TAG, "Creating forecast task");
 
-        xTaskCreateWithCaps(request_forecast_task, "forecast_task", 8192, NULL, 2, NULL, MALLOC_CAP_INTERNAL);
+        edt_add_system_event_handler(SYSTEM_EVENT_WIFI_STATUS,
+                                     [](system_event_t m)
+                                     {
+                                         if (m.value == 1)
+                                         {
+                                             ESP_LOGI(FC_TAG, "Wifi connected - notifying task");
+
+                                             xTaskNotifyGive(_forecast_task_handle); //
+                                         }
+                                     });
+
+        xTaskCreateWithCaps(request_forecast_task, "forecast_task", 8192, NULL, 2, &_forecast_task_handle, MALLOC_CAP_INTERNAL);
 
         return ESP_OK;
     }

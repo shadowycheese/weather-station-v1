@@ -9,7 +9,9 @@ extern "C"
 {
 #endif
 
-    extern lv::Flex create_box(lv_obj_t *parent, int width, int height);
+    extern lv::Flex create_vbox(lv_obj_t *parent, int width, int height);
+
+    extern lv::Flex create_hbox(lv_obj_t *parent, int width, int height);
 
     extern lv::Style new_style();
 

@@ -11,6 +11,7 @@ idf_component_register(
         ui/display.cpp
         ui/header.cpp
         ui/outside-temp.cpp
+        ui/fonts/fonts.cpp
         net/network.cpp
         net/forecast.cpp
         ../../shared-components/core/src/espio.c
@@ -29,7 +30,10 @@ idf_component_register(
         lwip
         lvgl__lvgl
         waveshare__esp32_p4_platform
-        waveshare__esp_lcd_ili9881c        
+        waveshare__esp_lcd_ili9881c     
+    EMBED_TXTFILES
+        resources/fonts/Montserrat-Bold.ttf
+        resources/fonts/Montserrat-Regular.ttf
 )
 
 idf_component_get_property(LVGL_LIB lvgl__lvgl COMPONENT_LIB)

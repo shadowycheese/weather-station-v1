@@ -14,12 +14,13 @@ public:
 
 private:
     lv::ObjectView _root;
-    lv::Spangroup _mainTemperature;
-    lv_span_t *_temperatureElement;
-    lv_span_t *_tempUnit;
-    lv::Spangroup _sgMinMax;
-    lv::Spangroup _sgHumidity;
-    lv::Spangroup _sgPressire;
+    lv::Label _temperature;
+    lv::Spangroup _minMax;
+    lv::Label _rainfall;
+    lv::Label _humidity;
+    lv::Label _pressure;
+
+    lv_span_t *_min, *_max;
 };
 
 #endif

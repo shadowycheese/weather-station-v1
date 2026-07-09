@@ -141,7 +141,7 @@ void MetricsRepository::update_time_series_data(sensor_data_t *sensor_data, metr
     _latest[id].min = value;
     _latest[id].max = value;
 
-    if (_24h_high[id].max < value)
+    if (_24h_high[id].timestamp < 0 || _24h_high[id].max < value)
     {
         _24h_high[id].average = value;
         _24h_high[id].min = value;
@@ -150,7 +150,7 @@ void MetricsRepository::update_time_series_data(sensor_data_t *sensor_data, metr
 
         attributes |= IS_24_HR_HIGH;
     }
-    if (_24h_low[id].min > value)
+    if (_24h_low[id].timestamp < 0 || _24h_low[id].min > value)
     {
         _24h_low[id].average = value;
         _24h_low[id].min = value;

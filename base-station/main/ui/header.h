@@ -16,7 +16,6 @@ private:
     lv::Label _labelTime;
     lv::Label _labelDate;
     lv::Label _labelWifi;
-    lv::Label _labelStatus;
 };
 
 #endif
