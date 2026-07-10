@@ -18,22 +18,21 @@ public:
     void clear();
 
 private:
-    lv::Spangroup _forecast;
-    lv_span_t *_date;
-    lv_span_t *_temp_min;
-    lv_span_t *_temp_max;
-    lv_span_t *_weather;
-    lv_span_t *_wind;
-    lv_span_t *_wind_dir;
-    lv_span_t *_pop;
-    lv_span_t *_snow;
-    lv_span_t *_rain;
+    lv::Label _day;
+    lv::Image _weather;
+    lv::Label _temp;
+    lv::Spangroup _pop;
+    lv_span_t *_pop_pc;
+    lv::Spangroup _precip;
+    lv_span_t *_pr_total;
+    lv_span_t *_pr_units;
+    lv::Image _pr_type;
+    lv::Spangroup _wind;
+    lv_span_t *_wind_speed;
+    lv_span_t *_wind_gust;
+    lv::Image _wind_dir;
 
-    const char *weather_code_icon(int16_t wc);
-    const char *wind_dir(int16_t wd);
-    lv_color_t weather_code_color(int16_t wc);
-    lv_color_t wind_speed_color(float windspeed);
-    lv_color_t pop_color(float windspeed);
+    const uint8_t *weather_code_icon(forecast_day_t *fc);
 };
 
 class Forecast : public Card
@@ -41,7 +40,7 @@ class Forecast : public Card
 public:
     virtual void init(lv::ObjectView parent)
     {
-        auto box = create_vbox(parent, SCREEN_WIDTH, 120).bg_color(COL_BACKGROUND_2).padding(6);
+        auto box = create_vbox(parent, SCREEN_WIDTH, 120).bg_color(COL_BACKGROUND_2).padding(0);
 
         _today.init(box);
         _tomorrow.init(box);

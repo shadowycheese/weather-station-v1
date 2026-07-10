@@ -5,6 +5,7 @@
 #include "models.h"
 #include "ui/ui-helpers.h"
 #include "ui/fonts/fonts.h"
+#include "ui/icons/icons.h"
 
 Display *Display::_instance = NULL;
 
@@ -28,6 +29,8 @@ void Display::start()
     bsp_display_lock(-1);
 
     init_fonts();
+
+    init_icons();
 
     init_ui();
 

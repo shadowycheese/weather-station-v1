@@ -21,6 +21,7 @@ typedef struct
 
 typedef struct
 {
+    forecast_day_t current;
     forecast_day_t today;
     forecast_day_t tomorrow;
 } forecast_t;

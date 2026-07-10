@@ -24,12 +24,12 @@ static uint8_t *_forecast_json_buffer = NULL;
 
 const char *FC_TAG = "FORECAST";
 
-// https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_probability_max,rain_sum,snowfall_sum,uv_index_max&forecast_days=2
+// https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_probability_max,rain_sum,snowfall_sum,uv_index_max&forecast_days=2&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,weather_code,rain,snowfall
 
 esp_err_t request_forecast()
 {
     // Configure target server details and raw HTTP request text
-    const char *REQUEST = "GET /v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_probability_max,rain_sum,snowfall_sum,uv_index_max&forecast_days=2 HTTP/1.1\r\n"
+    const char *REQUEST = "GET v1/forecast?latitude=52.52&longitude=13.41&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_probability_max,rain_sum,snowfall_sum,uv_index_max&forecast_days=2&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,weather_code,rain,snowfall HTTP/1.1\r\n"
                           "Host: api.open-meteo.com\r\n"
                           "User-Agent: esp32-p4-app\r\n"
                           "Connection: close\r\n"
@@ -143,6 +143,7 @@ esp_err_t parse_forecast()
     cJSON *snow = cJSON_GetObjectItem(daily, "snowfall_sum");
     cJSON *uv = cJSON_GetObjectItem(daily, "uv_index_max");
     cJSON *dates = cJSON_GetObjectItem(daily, "time");
+    cJSON *current = cJSON_GetObjectItem(root, "current");
 
     strncpy(_forecast.today.date, cJSON_GetArrayItem(dates, 0)->valuestring, 10);
     _forecast.today.pop = cJSON_GetArrayItem(pop, 0)->valuedouble;
@@ -168,13 +169,25 @@ esp_err_t parse_forecast()
     _forecast.tomorrow.wind_dir = cJSON_GetArrayItem(wind_speed, 1)->valueint;
     _forecast.tomorrow.uv_index = cJSON_GetArrayItem(uv, 1)->valuedouble;
 
+    strncpy(_forecast.tomorrow.date, "NOW", 10);
+    _forecast.current.pop = -1;
+    _forecast.current.rain = cJSON_GetObjectItem(current, "rain")->valuedouble;
+    _forecast.current.snow = cJSON_GetObjectItem(current, "snowfall")->valuedouble;
+    _forecast.current.temp_max = cJSON_GetObjectItem(current, "temperature_2m")->valuedouble;
+    _forecast.current.temp_min = _forecast.current.temp_max;
+    _forecast.current.weather_code = cJSON_GetObjectItem(current, "weather_code")->valueint;
+    _forecast.current.wind_speed = cJSON_GetObjectItem(current, "wind_speed_10m")->valuedouble;
+    _forecast.current.wind_gust = cJSON_GetObjectItem(current, "wind_gusts_10m")->valuedouble;
+    _forecast.current.wind_dir = cJSON_GetObjectItem(current, "wind_direction_10m")->valuedouble;
+    _forecast.current.uv_index = -1;
+
     cJSON_Delete(root);
     ESP_LOGI(FC_TAG, "Finished parsing forecast JSON: %s: T=%0.1f WC=%d WS=%0.1f POP=%0.1f UV=%0.2f",
-             _forecast.tomorrow.date,
+             _forecast.today.date,
              _forecast.today.temp_max,
-             _forecast.tomorrow.weather_code,
+             _forecast.today.weather_code,
              _forecast.today.wind_speed,
-             _forecast.tomorrow.pop,
+             _forecast.today.pop,
              _forecast.today.uv_index);
 
     return ESP_OK;

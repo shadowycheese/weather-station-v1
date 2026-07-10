@@ -1,43 +1,42 @@
-#ifndef Fonts_h
-#define Fonts_h
-
-#include "lv.hpp"
+#ifndef Icons_h
+#define Icons_h
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    extern lv_font_t *ttf_font_montserrat_12;
-    extern lv_font_t *ttf_font_montserrat_14;
-    extern lv_font_t *ttf_font_montserrat_16;
-    extern lv_font_t *ttf_font_montserrat_18;
-    extern lv_font_t *ttf_font_montserrat_20;
-    extern lv_font_t *ttf_font_montserrat_22;
-    extern lv_font_t *ttf_font_montserrat_24;
 
-    extern lv_font_t *ttf_font_montserrat_12_bold;
-    extern lv_font_t *ttf_font_montserrat_14_bold;
-    extern lv_font_t *ttf_font_montserrat_16_bold;
-    extern lv_font_t *ttf_font_montserrat_18_bold;
-    extern lv_font_t *ttf_font_montserrat_20_bold;
-    extern lv_font_t *ttf_font_montserrat_22_bold;
-    extern lv_font_t *ttf_font_montserrat_24_bold;
-
-    extern lv_font_t *ttf_font_montserrat_36_bold;
-    extern lv_font_t *ttf_font_montserrat_48_bold;
-    extern lv_font_t *ttf_font_montserrat_72_bold;
-    extern lv_font_t *ttf_font_montserrat_96_bold;
-    extern lv_font_t *ttf_font_montserrat_144_bold;
-
-    extern lv_font_t *ttf_font_la_solid_12;
-    extern lv_font_t *ttf_font_la_solid_18;
-    extern lv_font_t *ttf_font_la_solid_24;
-    extern lv_font_t *ttf_font_la_solid_36;
-    extern lv_font_t *ttf_font_la_solid_48;
-    extern lv_font_t *ttf_font_la_solid_72;
-    extern lv_font_t *ttf_font_la_solid_96;
-
-    extern void init_fonts();
+    extern const uint8_t *icon_cloudy_night_2;
+    extern const uint8_t *icon_rainy_3;
+    extern const uint8_t *icon_snowy_5;
+    extern const uint8_t *icon_rainy_6;
+    extern const uint8_t *icon_rainy_5;
+    extern const uint8_t *icon_cloudy;
+    extern const uint8_t *icon_rainy_4;
+    extern const uint8_t *icon_weather;
+    extern const uint8_t *icon_snowy_3;
+    extern const uint8_t *icon_snowy_2;
+    extern const uint8_t *icon_snowy_4;
+    extern const uint8_t *icon_snowy_1;
+    extern const uint8_t *icon_cloudy_day_1;
+    extern const uint8_t *icon_thunder;
+    extern const uint8_t *icon_day;
+    extern const uint8_t *icon_weather_sagittarius;
+    extern const uint8_t *icon_snowy_6;
+    extern const uint8_t *icon_night;
+    extern const uint8_t *icon_weather_sprite;
+    extern const uint8_t *icon_cloudy_night_3;
+    extern const uint8_t *icon_cloudy_day_3;
+    extern const uint8_t *icon_cloudy_day_2;
+    extern const uint8_t *icon_rainy_2;
+    extern const uint8_t *icon_rainy_1;
+    extern const uint8_t *icon_rainy_7;
+    extern const uint8_t *icon_cloudy_night_1;
+    extern const uint8_t *icon_weather_sunset;
+    extern const uint8_t *icon_wind;
+    extern const uint8_t *icon_arrow_up;
+    extern const uint8_t *icon_fog;
+    extern void init_icons();
 
 #ifdef __cplusplus
 }

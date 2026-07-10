@@ -13,6 +13,7 @@ idf_component_register(
         ui/outside-temp.cpp
         ui/forecast.cpp
         ui/fonts/fonts.cpp
+        ui/icons/icons.cpp
         net/network.cpp
         net/forecast-task.cpp
         utils/json.cpp
