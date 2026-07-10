@@ -46,7 +46,7 @@ void Display::init_ui()
 
     _mainPanel = create_vbox(NULL, SCREEN_WIDTH, SCREEN_HEIGHT).outline_width(0);
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         _cards[i]->init(_mainPanel);
     }

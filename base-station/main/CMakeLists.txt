@@ -11,9 +11,11 @@ idf_component_register(
         ui/display.cpp
         ui/header.cpp
         ui/outside-temp.cpp
+        ui/forecast.cpp
         ui/fonts/fonts.cpp
         net/network.cpp
-        net/forecast.cpp
+        net/forecast-task.cpp
+        utils/json.cpp
         ../../shared-components/core/src/espio.c
          ../../shared-components/core/src/espuart.c
    INCLUDE_DIRS 
@@ -26,6 +28,7 @@ idf_component_register(
         esp_wifi 
         esp_netif 
         esp_event 
+        json
         nvs_flash 
         lwip
         lvgl__lvgl

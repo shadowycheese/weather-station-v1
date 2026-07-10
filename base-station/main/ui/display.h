@@ -6,6 +6,7 @@
 #include "ui/core/card.h"
 #include "ui/header.h"
 #include "ui/outside-temp.h"
+#include "ui/forecast.h"
 
 class Display
 {
@@ -26,8 +27,9 @@ private:
 
     Header _header;
     OutsideTemp _outsideTemp;
+    Forecast _forecast;
 
-    Card *_cards[2] = {&_header, &_outsideTemp};
+    Card *_cards[3] = {&_header, &_outsideTemp, &_forecast};
 
     static Display *_instance;
 };

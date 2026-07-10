@@ -21,7 +21,8 @@
 #include "metrics/metrics-repo.h"
 #include "net/network.h"
 #include "log/log.h"
-#include "net/forecast.h"
+#include "net/forecast-task.h"
+#include "utils/json.h"
 
 const char *TAG = "APP";
 
@@ -31,6 +32,8 @@ MetricsRepository metrics_repo;
 extern "C" void app_main(void)
 {
     nvs_flash_init();
+
+    json_init();
 
     edt_init();
 
