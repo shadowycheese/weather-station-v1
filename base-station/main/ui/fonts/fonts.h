@@ -22,7 +22,7 @@ extern "C"
     extern lv_font_t *ttf_font_montserrat_20_bold;
     extern lv_font_t *ttf_font_montserrat_22_bold;
     extern lv_font_t *ttf_font_montserrat_24_bold;
-
+    extern lv_font_t *ttf_font_montserrat_30_bold;
     extern lv_font_t *ttf_font_montserrat_36_bold;
     extern lv_font_t *ttf_font_montserrat_48_bold;
     extern lv_font_t *ttf_font_montserrat_72_bold;

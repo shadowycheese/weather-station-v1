@@ -7,17 +7,24 @@
 #include "ui/fonts/fonts.h"
 #include "ui/icons/icons.h"
 
-Display *Display::_instance = NULL;
-
-Display::Display()
-{
-    _instance = this;
+#define PSIRAM_LV_ADAPTER_DEFAULT_CONFIG() {                       \
+    .task_stack_size = ESP_LV_ADAPTER_DEFAULT_STACK_SIZE,          \
+    .task_priority = ESP_LV_ADAPTER_DEFAULT_TASK_PRIORITY,         \
+    .task_core_id = ESP_LV_ADAPTER_DEFAULT_TASK_CORE_ID,           \
+    .tick_period_ms = ESP_LV_ADAPTER_DEFAULT_TICK_PERIOD_MS,       \
+    .task_min_delay_ms = ESP_LV_ADAPTER_DEFAULT_TASK_MIN_DELAY_MS, \
+    .task_max_delay_ms = ESP_LV_ADAPTER_DEFAULT_TASK_MAX_DELAY_MS, \
+    .stack_in_psram = true,                                        \
 }
+
+Display *Display::_instance = NULL;
 
 void Display::start()
 {
+    _instance = this;
+
     static bsp_display_cfg_t cfg = {
-        .lv_adapter_cfg = ESP_LV_ADAPTER_DEFAULT_CONFIG(),
+        .lv_adapter_cfg = PSIRAM_LV_ADAPTER_DEFAULT_CONFIG(),
         .rotation = ESP_LV_ADAPTER_ROTATE_0,
         .tear_avoid_mode = ESP_LV_ADAPTER_TEAR_AVOID_MODE_TRIPLE_PARTIAL,
         .touch_flags = {.swap_xy = 0, .mirror_x = 0, .mirror_y = 0}};

@@ -6,6 +6,8 @@
 #include "events/edt.h"
 #include "log/debug.h"
 
+const char *EDT_TAG = "EDT";
+
 static QueueHandle_t _edt_job_queue = NULL;
 
 class EventDispatcher
@@ -198,6 +200,8 @@ void edt_timer_task(void *pvParameters)
 
 void edt_init()
 {
+    ESP_LOGI(EDT_TAG, "Starting EDT...");
+
     _edt_job_queue = xQueueCreate(128, sizeof(edt_job_t));
 
     _event_dispatcher.init();

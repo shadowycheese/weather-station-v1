@@ -26,20 +26,32 @@
 
 const char *TAG = "APP";
 
-Display display;
-MetricsRepository metrics_repo;
+Display *_display;
+MetricsRepository *_metrics_repo;
 
 extern "C" void app_main(void)
 {
+    ESP_LOGI(TAG, "Memory PSRAM Free: %ld, Largest: %ld | INTERNAL Free: %ld, Largest: %ld",
+             heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
+             heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM),
+             heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+             heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+
     nvs_flash_init();
+
+    ESP_LOGI(TAG, "Starting File systems...");
+
+    ESP_LOGI(TAG, "File system started");
 
     json_init();
 
     edt_init();
 
-    display.start();
+    _display = new Display();
+    _metrics_repo = new MetricsRepository();
 
-    metrics_repo.init();
+    _display->start();
+    _metrics_repo->init();
 
     wifi_init();
 
@@ -51,5 +63,5 @@ extern "C" void app_main(void)
 
     forecast_init();
 
-    display.set_boot_complete();
+    _display->set_boot_complete();
 }

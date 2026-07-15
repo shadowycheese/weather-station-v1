@@ -11,8 +11,6 @@
 class Display
 {
 public:
-    Display();
-
     void start();
 
     static void log_message(log_level_t level, const char *message);

@@ -28,7 +28,7 @@ int ieee_802154_transmit_sensor_data(sensor_id_t sensor_id, sensor_data_t *senso
     frame[idx++] = sensor_id & 0xFF;
     frame[idx++] = (sensor_id >> 8) & 0xFF;
 
-    memcpy(&frame[idx], sensor_data, sizeof(sensor_data_t));
+        memcpy(&frame[idx], sensor_data, sizeof(sensor_data_t));
     idx += sizeof(sensor_data_t);
 
     uint8_t total_length = idx + 2;

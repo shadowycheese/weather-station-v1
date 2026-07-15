@@ -1,34 +1,71 @@
 #include "ui/forecast.h"
 #include "ui/extensions/style-wrapper.hpp"
 #include "ui/icons/icons.h"
+#include "ui/ui-helpers.h"
 #include "net/forecast-task.h"
 
-#define FORECAST_HEIGHT 60
+#define FORECAST_HEIGHT 100
+#define DAY_WIDTH 130
+#define WEATHER_ICON_WIDTH 100
+#define TEMP_WIDTH 130
+#define POP_WIDTH 120
+#define PRECIP_WIDTH 140
+#define PRECIP_ICON_WIDTH 40
+#define WIND_ICON_WIDTH 40
+#define WIND_WIDTH 300
+#define WIND_DIR_ICON_WIDTH 40
+#define GAP 4
 
-void ForecastDay::init(lv::ObjectView parent)
+void ForecastDay::init(const char *title, lv::ObjectView parent)
 {
-    auto box = create_hbox(parent, SCREEN_WIDTH, FORECAST_HEIGHT);
+    auto box = create_hbox(parent, SCREEN_WIDTH, FORECAST_HEIGHT)
+                   .layout_none()
+                   .bg_color(COL_BACKGROUND_2);
+
+    int x = GAP;
 
     _day = lv::Label::create(box)
-               .margin_top(-7)
-               .text_align(LV_TEXT_ALIGN_CENTER)
+               .text(title)
+               .text_align(LV_TEXT_ALIGN_RIGHT)
                .text_color(COL_TEXT_SECONDARY)
+               .width(DAY_WIDTH)
+               .height(FORECAST_HEIGHT)
+               .x(x)
+               .y(13)
                .text_font(FONT_24PT_BOLD);
 
-    _weather = lv::Image::create(box);
+    x += DAY_WIDTH + GAP;
+
+    _weather = lv::Image::create(box)
+                   .x(x + 2)
+                   .y(10)
+                   .width(WEATHER_ICON_WIDTH)
+                   .height(WEATHER_ICON_WIDTH);
+
+    x += WEATHER_ICON_WIDTH;
 
     _temp = lv::Label::create(box)
-                .margin_top(-7)
+                .text("")
                 .text_align(LV_TEXT_ALIGN_CENTER)
                 .text_color(COL_TEXT_PRIMARY)
-                .text_font(FONT_36PT_BOLD);
+                .text_font(FONT_48PT_BOLD)
+                .x(x)
+                .y(26)
+                .width(TEMP_WIDTH)
+                .height(FORECAST_HEIGHT);
+
+    x += TEMP_WIDTH;
+
+    int x2 = x;
 
     _pop = lv::Spangroup::create(box)
-               .fill_width()
-               .margin_top(-7)
-               .text_align(LV_TEXT_ALIGN_CENTER)
+               .width(POP_WIDTH)
+               .height(FORECAST_HEIGHT / 2)
+               .text_align(LV_TEXT_ALIGN_LEFT)
                .text_color(COL_TEXT_SECONDARY)
-               .text_font(FONT_24PT);
+               .text_font(FONT_24PT)
+               .x(x)
+               .y(10);
 
     auto popTitle = _pop.new_span();
     _pop_pc = _pop.new_span();
@@ -39,28 +76,40 @@ void ForecastDay::init(lv::ObjectView parent)
         .text_font(FONT_24PT);
     style_wrapper(_precip.span_style(popUnits))
         .text_color(COL_TEXT_SECONDARY)
-        .text_font(FONT_24PT);
+        .text_font(FONT_22PT);
     style_wrapper(_precip.span_style(_pop_pc))
         .text_color(COL_TEXT_PRIMARY)
-        .text_font(FONT_24PT_BOLD);
+        .text_font(FONT_30PT_BOLD);
 
-    _pop.span_text(popTitle, "POP");
+    _pop.span_text(popTitle, "POP ");
     _pop.span_text(popUnits, "%");
-    _pop.span_text(_pop_pc, "-");
+    _pop.span_text(_pop_pc, "");
+
+    x += POP_WIDTH + GAP;
+
+    _pr_type = lv::Image::create(box)
+                   .x(x)
+                   .y(11)
+                   .scale(64)
+                   .width(PRECIP_ICON_WIDTH)
+                   .height(PRECIP_ICON_WIDTH);
+
+    x += PRECIP_ICON_WIDTH - 4;
 
     _precip = lv::Spangroup::create(box)
-                  .fill_width()
-                  .margin_top(-7)
-                  .text_align(LV_TEXT_ALIGN_CENTER)
+                  .width(PRECIP_WIDTH)
+                  .height(FORECAST_HEIGHT / 2)
+                  .text_align(LV_TEXT_ALIGN_LEFT)
                   .text_color(COL_TEXT_SECONDARY)
-                  .text_font(FONT_24PT);
+                  .text_font(FONT_24PT)
+                  .x(x)
+                  .y(10);
 
     auto pr_title = _precip.new_span();
     _pr_total = _precip.new_span();
     _pr_units = _precip.new_span();
 
-    _precip.span_text(pr_title, "Total");
-    _precip.span_text(_pr_total, "-");
+    _precip.span_text(_pr_total, "");
     _precip.span_text(_pr_units, " mm");
 
     style_wrapper(_precip.span_style(pr_title))
@@ -71,16 +120,42 @@ void ForecastDay::init(lv::ObjectView parent)
         .text_font(FONT_24PT);
     style_wrapper(_wind.span_style(_pr_total))
         .text_color(COL_TEXT_PRIMARY)
-        .text_font(FONT_24PT_BOLD);
+        .text_font(FONT_30PT_BOLD);
 
-    lv::Image::create(box).src(icon_wind).recolor(COL_TEXT_SECONDARY);
+    x = x2;
+
+    lv::Image::create(box)
+        .src(icon_wind)
+        .recolor(COL_TEXT_SECONDARY)
+        .recolor_opa(LV_OPA_COVER)
+        .scale(64)
+        .x(x)
+        .y(62)
+        .width(WIND_ICON_WIDTH)
+        .height(WIND_ICON_WIDTH);
+
+    x += WIND_ICON_WIDTH - 4;
+
+    _wind_dir = lv::Image::create(box)
+                    .src(icon_arrow_up)
+                    .recolor(COL_TEXT_SECONDARY)
+                    .recolor_opa(LV_OPA_COVER)
+                    .scale(64)
+                    .x(x)
+                    .y(62)
+                    .width(WIND_DIR_ICON_WIDTH)
+                    .height(WIND_DIR_ICON_WIDTH);
+
+    x += WIND_DIR_ICON_WIDTH - 4;
 
     _wind = lv::Spangroup::create(box)
-                .fill_width()
+                .width(WIND_WIDTH)
                 .margin_top(-7)
-                .text_align(LV_TEXT_ALIGN_CENTER)
+                .text_align(LV_TEXT_ALIGN_LEFT)
                 .text_color(COL_TEXT_SECONDARY)
-                .text_font(FONT_24PT);
+                .text_font(FONT_24PT)
+                .x(x)
+                .y(62);
 
     _wind_speed = _wind.new_span();
     auto wind_sep = _wind.new_span();
@@ -95,33 +170,31 @@ void ForecastDay::init(lv::ObjectView parent)
         .text_font(FONT_24PT);
     style_wrapper(_wind.span_style(_wind_speed))
         .text_color(COL_TEXT_PRIMARY)
-        .text_font(FONT_24PT_BOLD);
+        .text_font(FONT_30PT_BOLD);
     style_wrapper(_wind.span_style(_wind_gust))
         .text_color(COL_TEXT_PRIMARY)
-        .text_font(FONT_24PT_BOLD);
+        .text_font(FONT_30PT_BOLD);
 
     _wind.span_text(wind_sep, " | ");
     _wind.span_text(wind_units, " km/h");
-    _wind.span_text(_wind_speed, "-");
-    _wind.span_text(_wind_gust, "-");
+    _wind.span_text(_wind_speed, "");
+    _wind.span_text(_wind_gust, "");
 
-    _wind_dir = lv::Image::create(box).src(icon_arrow_up);
+    x += WIND_WIDTH + GAP;
 
     clear();
 }
 
 void ForecastDay::clear()
 {
-    _day.text("-");
-    _pop.span_text(_pop_pc, "-");
-    _precip.span_text(_pr_total, "-");
-    _wind.span_text(_wind_speed, "-");
-    _wind.span_text(_wind_gust, "-");
+    _pop.span_text(_pop_pc, "");
+    _precip.span_text(_pr_total, "");
+    _wind.span_text(_wind_speed, "");
+    _wind.span_text(_wind_gust, "");
 
     _precip.refr_mode();
     _pop.refr_mode();
     _wind.refr_mode();
-    _day.invalidate();
 }
 
 void ForecastDay::update(forecast_day_t *fc)
@@ -131,119 +204,36 @@ void ForecastDay::update(forecast_day_t *fc)
     snprintf(temp, 10, "%0.1f", fc->temp_max);
     snprintf(wind, 10, "%0.1f", fc->wind_speed);
     snprintf(gust, 10, "%0.1f", fc->wind_gust);
-    snprintf(pop, 10, " %d", fc->pop);
+    snprintf(pop, 10, " %0.0f", fc->pop);
 
     if (fc->snow > fc->rain)
     {
         snprintf(precip, 10, " %0.1f", fc->snow + (fc->rain / 10));
 
-        _precip.span_text(_pr_units, "cm");
+        _precip.span_text(_pr_units, " cm");
         _precip.span_text(_pr_total, precip);
+
+        _pr_type.src(icon_snowflakes);
     }
     else
     {
         snprintf(precip, 10, " %0.1f", fc->rain + (fc->snow * 10));
 
-        _precip.span_text(_pr_units, "mm");
+        _precip.span_text(_pr_units, " mm");
         _precip.span_text(_pr_total, precip);
+
+        _pr_type.src(icon_raindrops);
     }
 
+    _pop.span_text(_pop_pc, pop);
+    _wind.span_text(_wind_speed, wind);
+    _wind.span_text(_wind_gust, gust);
+    _temp.text(temp);
     _weather.src(weather_code_icon(fc));
-    _wind_dir.rotation(fc->wind_dir * 10);
+
+    _wind_dir.rotation((fc->wind_dir + 180) * 10).invalidate();
 
     _precip.refr_mode();
     _pop.refr_mode();
     _wind.refr_mode();
-    _day.invalidate();
-}
-
-const uint8_t *ForecastDay::weather_code_icon(forecast_day_t *fc)
-{
-    if (fc->rain > 0.0 && fc->snow > 0.0)
-    {
-        return icon_rainy_7;
-    }
-
-    // 2. Standard WMO and Gap Code Evaluation
-    switch (fc->weather_code)
-    {
-    // Clear
-    case 0:
-        return icon_day;
-
-    // Clouds / Overcast
-    case 1:
-        return icon_cloudy_day_1;
-    case 2:
-        return icon_cloudy_day_3;
-    case 3:
-        return icon_cloudy;
-
-    // Fog & Rime
-    case 45:
-    case 48:
-        return icon_fog;
-
-    // Drizzle (Standard & Intermittent Gaps)
-    case 51:
-    case 52:
-    case 53:
-    case 54:
-    case 55:
-        return icon_rainy_1;
-
-    // Freezing Drizzle / Freezing Rain
-    case 56:
-    case 57:
-    case 66:
-    case 67:
-        return icon_rainy_7;
-
-    // Rain (Standard & Intermittent Gaps)
-    case 61:
-        return icon_rainy_4;
-    case 62:
-    case 63:
-        return icon_rainy_5;
-    case 64:
-    case 65:
-        return icon_rainy_6;
-
-    // Snow & Grains (Standard & Intermittent Gaps)
-    case 71:
-    case 72:
-        return icon_snowy_4;
-    case 73:
-    case 74:
-        return icon_snowy_5;
-    case 75:
-        return icon_snowy_6;
-    case 77:
-        return icon_snowy_4;
-
-    // Rain Showers
-    case 80:
-        return icon_rainy_4;
-    case 81:
-        return icon_rainy_5;
-    case 82:
-        return icon_rainy_6;
-
-    // Snow Showers
-    case 85:
-        return icon_snowy_4;
-    case 86:
-        return icon_snowy_5;
-
-    // Thunderstorms
-    case 95:
-        return icon_thunder;
-    case 96:
-    case 99:
-        return icon_thunder;
-
-    // Catch-all safety fallback
-    default:
-        return icon_cloudy;
-    }
 }

@@ -12,7 +12,7 @@
 class ForecastDay
 {
 public:
-    void init(lv::ObjectView parent);
+    void init(const char *title, lv::ObjectView parent);
     void update(forecast_day_t *fc);
 
     void clear();
@@ -31,8 +31,6 @@ private:
     lv_span_t *_wind_speed;
     lv_span_t *_wind_gust;
     lv::Image _wind_dir;
-
-    const uint8_t *weather_code_icon(forecast_day_t *fc);
 };
 
 class Forecast : public Card
@@ -40,32 +38,30 @@ class Forecast : public Card
 public:
     virtual void init(lv::ObjectView parent)
     {
-        auto box = create_vbox(parent, SCREEN_WIDTH, 120).bg_color(COL_BACKGROUND_2).padding(0);
+        auto box = create_vbox(parent, SCREEN_WIDTH, 100).bg_color(COL_BACKGROUND_2).padding(0);
 
-        _today.init(box);
-        _tomorrow.init(box);
+        //_today.init("Today", box);
+        _tomorrow.init("Tomorrow", box);
 
         edt_add_system_event_handler(SYSTEM_EVENT_FORECAST, [this](system_event_t m)
                                      {
                                          forecast_t fc;
 
-                                         printf("Got forecast event");
-
                                          if (get_forecast(&fc) == ESP_OK)
                                          {
-                                             _today.update(&fc.today);
+                                             //_today.update(&fc.today);
                                              _tomorrow.update(&fc.tomorrow);
                                          }
                                          else
                                          {
-                                             _today.clear();
+                                             //_today.clear();
                                              _tomorrow.clear();
                                          } //
                                      });
     }
 
 private:
-    ForecastDay _today;
+    // ForecastDay _today;
     ForecastDay _tomorrow;
 };
 

@@ -18,7 +18,7 @@ lv_font_t *ttf_font_montserrat_18_bold;
 lv_font_t *ttf_font_montserrat_20_bold;
 lv_font_t *ttf_font_montserrat_22_bold;
 lv_font_t *ttf_font_montserrat_24_bold;
-
+lv_font_t *ttf_font_montserrat_30_bold;
 lv_font_t *ttf_font_montserrat_36_bold;
 lv_font_t *ttf_font_montserrat_48_bold;
 lv_font_t *ttf_font_montserrat_72_bold;
@@ -56,7 +56,7 @@ extern "C"
         ttf_font_montserrat_20_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 20);
         ttf_font_montserrat_22_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 22);
         ttf_font_montserrat_24_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 24);
-
+        ttf_font_montserrat_30_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 30);
         ttf_font_montserrat_36_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 36);
         ttf_font_montserrat_48_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 48);
         ttf_font_montserrat_72_bold = lv_tiny_ttf_create_data(Montserrat_Bold_ttf, len_bold, 72);

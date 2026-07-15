@@ -9,6 +9,21 @@
 #define IS_24_HR_LOW 0x0001
 #define IS_24_HR_HIGH 0x0002
 
+#define TS_IS_VALID ((uint16_t)0xA005) // All ts values are of the form 101xxxxxxxxxx101
+#define TS_NO_VALUE ((uint16_t)0x0010)
+
+typedef enum : uint16_t
+{
+    HIGH_24H,
+    LOW_24H,
+    HIGH_7D,
+    LOW_7D,
+    HIGH_90D,
+    LOW_90D,
+    HIGH_ALL_TIME,
+    HIGH_LOW_COUNT,
+} metric_hl_t;
+
 typedef enum : uint16_t
 {
     METRIC_INSIDE_BME280_TEMPERATURE,
@@ -40,6 +55,17 @@ typedef enum : uint16_t
     METRIC_OUTSIDE_RAINFULL_MM_12HOURS,
     METRIC_OUTSIDE_RAINFULL_MM_24HOURS,
     METRIC_OUTSIDE_RAINFULL_BATTERY,
+    METRIC_SPARE_1,
+    METRIC_SPARE_2,
+    METRIC_SPARE_3,
+    METRIC_SPARE_4,
+    METRIC_SPARE_5,
+    METRIC_SPARE_6,
+    METRIC_SPARE_7,
+    METRIC_SPARE_8,
+    METRIC_SPARE_9,
+    METRIC_SPARE_10,
+    METRIC_SPARE_11,
     METRIC_COUNT
 } metric_id_t;
 
@@ -48,6 +74,7 @@ typedef struct
     time_t timestamp;
     sensor_id_t sensor_id;
     metric_id_t metric_id;
+    uint16_t time_series_attributes;
     float max;
     float min;
     float average;

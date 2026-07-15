@@ -19,6 +19,7 @@ private:
     lv::Label _rainfall;
     lv::Label _humidity;
     lv::Label _pressure;
+    lv::Image _weather;
 
     lv_span_t *_min, *_max;
 };

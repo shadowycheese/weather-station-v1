@@ -3,6 +3,7 @@
 
 #include "lv.hpp"
 #include "ui/extensions/style-wrapper.hpp"
+#include "net/forecast-task.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -16,6 +17,8 @@ extern "C"
     extern lv::Style new_style();
 
     extern lv::StyleWrapper style_wrapper(lv_style_t *style);
+
+    const lv_img_dsc_t *weather_code_icon(forecast_day_t *fc);
 
 #ifdef __cplusplus
 }

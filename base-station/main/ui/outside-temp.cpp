@@ -1,5 +1,6 @@
 #include "models.h"
 #include "events/edt.h"
+#include "net/forecast-task.h"
 #include "ui/outside-temp.h"
 #include "ui/theme.h"
 #include "ui/ui-helpers.h"
@@ -24,14 +25,25 @@ void OutsideTemp::init(lv::ObjectView parent)
                     .padding(0)
                     .outline_width(1);
 
-    lv::Label::create(lbox)
+    auto tbox = create_hbox(lbox, TEMP_WIDTH + 10, 48)
+                    .align(LV_ALIGN_TOP_LEFT)
+                    .bg_color(COL_BACKGROUND_2)
+                    .border_width(0)
+                    .padding(0)
+                    .outline_width(0);
+    lv::Label::create(tbox)
         .text("Outside Temperature")
         .text_color(COL_TEXT_SECONDARY)
         .text_font(FONT_24PT_BOLD)
         .border_color(COL_BACKGROUND_2)
         .border_width(6)
-        .fill_width()
         .align(LV_ALIGN_TOP_LEFT);
+
+    _weather = lv::Image::create(tbox)
+                   .align(LV_ALIGN_TOP_RIGHT)
+                   .offset_y(-36)
+                   .fill_width()
+                   .scale(128);
 
     _temperature = lv::Label::create(lbox)
                        .text_color(COL_TEXT_PRIMARY)
@@ -41,6 +53,7 @@ void OutsideTemp::init(lv::ObjectView parent)
                        .border_width(0)
                        .margin_top(-10)
                        .margin_bottom(-10)
+                       .text("wait")
                        .align(LV_ALIGN_CENTER);
 
     auto lbox2 = create_hbox(lbox, 0, 60)
@@ -131,6 +144,13 @@ void OutsideTemp::init(lv::ObjectView parent)
                     .pad_left(20)
                     .text_font(FONT_36PT_BOLD)
                     .bg_color(COL_BACKGROUND_2);
+
+    edt_add_system_event_handler(SYSTEM_EVENT_FORECAST, [this](system_event_t m)
+                                 {
+                                     forecast_t fc;
+                                     get_forecast(&fc);
+                                     _weather.src(weather_code_icon(&fc.current)); //
+                                 });
 
     edt_add_metric_event_handler(METRIC_OUTSIDE1_BME280_TEMPERATURE, [this](metric_event_t m)
                                  {

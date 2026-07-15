@@ -24,7 +24,7 @@
 #define FONT_20PT_BOLD ttf_font_montserrat_20_bold
 #define FONT_22PT_BOLD ttf_font_montserrat_20_bold
 #define FONT_24PT_BOLD ttf_font_montserrat_24_bold
-
+#define FONT_30PT_BOLD ttf_font_montserrat_30_bold
 #define FONT_36PT_BOLD ttf_font_montserrat_36_bold
 #define FONT_48PT_BOLD ttf_font_montserrat_48_bold
 #define FONT_72PT_BOLD ttf_font_montserrat_72_bold
