@@ -11,6 +11,23 @@
 #define SEVEN_DAY_INTERVAL_COUNT (7 * 24)
 #define NINETY_DAY_INTERVAL_COUNT (90)
 
+typedef enum : uint16_t
+{
+    HIGH_VALUE,
+    LOW_VALUE,
+    HIGH_LOW_COUNT
+} metric_hl_t;
+
+typedef struct
+{
+    float min[METRIC_COUNT]{};
+    float max[METRIC_COUNT]{};
+    float values[METRIC_COUNT]{};
+    int count[METRIC_COUNT]{};
+    bool min_set[METRIC_COUNT]{};
+    bool max_set[METRIC_COUNT]{};
+} accumulation_t;
+
 class MetricsRepository
 {
 public:
@@ -28,13 +45,37 @@ private:
 
     void update(sensor_data_t *sensor_data);
 
+    inline int ts_index(metric_id_t metric_id, int row, int interval_count)
+    {
+        return (row * interval_count) + metric_id;
+    }
+
     void load_all();
     void load_metrics_file(const char *file_name, void *destination, size_t size);
     void reset_file(const char *file_name, void *destination, size_t size);
 
-    void save_5_minute_interval();
-    void save_1_hour_interval();
-    void save_1_day_minute_interval();
+    void accumulate(timeseries_data_t *ts, accumulation_t *acc);
+
+    void accumulate_interval(time_t interval_start,
+                             time_t interval_end,
+                             timeseries_data_t *ts,
+                             int interval_count,
+                             int head_pos,
+                             accumulation_t *acc);
+
+    void distribute(time_t timestamp, timeseries_data_t *ts, int interval_count, int head_pos, accumulation_t *acc);
+
+    void save_metrics(const char *file_name, void *metrics, int row, int interval_count);
+
+    void sync_metrics();
+
+    void sync_5_min_inteval(time_t now);
+    void sync_1_hour_interval(time_t now);
+    void sync_1_day_interval(time_t now);
+
+    void clear_24_hr_hl();
+
+    int find_head(timeseries_data_t *ts, int interval_count);
 
     void update_time_series_data(sensor_data_t *sensor_data, metric_id_t metric_id, float value);
 
@@ -51,12 +92,6 @@ private:
     void update_outside_sps30_set3(sensor_data_t *sensor_data);
     void update_outside_rain_gauge(sensor_data_t *sensor_data);
 
-    void sync_metrics();
-
-    void sync_5_min_inteval(time_t now);
-    void sync_1_hour_interval(time_t now);
-    void sync_1_day_interval(time_t now);
-
     Func _sensor_updates[9] = {
         &MetricsRepository::update_inside_bme280,
         &MetricsRepository::update_inside_sgp30,
@@ -70,10 +105,11 @@ private:
 
     timeseries_data_t *_latest;
     timeseries_data_t *_unbucketed;
-    timeseries_data_t (*_highs_and_lows)[HIGH_LOW_COUNT];
-    timeseries_data_t (*_24_hours)[ONE_DAY_INTERVAL_COUNT];
-    timeseries_data_t (*_7_days)[SEVEN_DAY_INTERVAL_COUNT];
-    timeseries_data_t (*_90_days)[NINETY_DAY_INTERVAL_COUNT];
+    timeseries_data_t *_highs_and_lows_24_hours;
+    timeseries_data_t *_highs_and_lows_all_time;
+    timeseries_data_t *_24_hours;
+    timeseries_data_t *_7_days;
+    timeseries_data_t *_90_days;
 
     TaskHandle_t _storage_task_handle = NULL;
 
@@ -90,10 +126,11 @@ private:
 
     static MetricsRepository *_instance;
 
-    const size_t _size_highs_and_lows = sizeof(*_highs_and_lows) * METRIC_COUNT;
-    const size_t _size_24_hours = sizeof(*_24_hours) * METRIC_COUNT;
-    const size_t _size_7_days = sizeof(*_7_days) * METRIC_COUNT;
-    const size_t _size_90_days = sizeof(*_90_days) * METRIC_COUNT;
+    const size_t _size_highs_and_lows_all_time = sizeof(timeseries_data_t) * HIGH_LOW_COUNT * METRIC_COUNT;
+    const size_t _size_highs_and_lows_24_hours = sizeof(timeseries_data_t) * HIGH_LOW_COUNT * METRIC_COUNT;
+    const size_t _size_24_hours = sizeof(timeseries_data_t) * ONE_DAY_INTERVAL_COUNT * METRIC_COUNT;
+    const size_t _size_7_days = sizeof(timeseries_data_t) * SEVEN_DAY_INTERVAL_COUNT * METRIC_COUNT;
+    const size_t _size_90_days = sizeof(timeseries_data_t) * NINETY_DAY_INTERVAL_COUNT * METRIC_COUNT;
 
     friend void storage_task(void *);
 

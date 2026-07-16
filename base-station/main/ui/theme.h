@@ -4,8 +4,6 @@
 #include "lv.hpp"
 #include "ui/fonts/fonts.h"
 
-#define TIME_ZONE_OFFSET (-(7L * 3600L))
-
 #define SCREEN_WIDTH 720
 #define SCREEN_HEIGHT 1280
 

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <time.h>
 
+#define TIME_ZONE_OFFSET (-(7L * 3600L))
+
 #include "models.h"
 
 typedef enum : uint16_t

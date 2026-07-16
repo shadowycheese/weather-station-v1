@@ -14,18 +14,6 @@
 
 typedef enum : uint16_t
 {
-    HIGH_24H,
-    LOW_24H,
-    HIGH_7D,
-    LOW_7D,
-    HIGH_90D,
-    LOW_90D,
-    HIGH_ALL_TIME,
-    HIGH_LOW_COUNT,
-} metric_hl_t;
-
-typedef enum : uint16_t
-{
     METRIC_INSIDE_BME280_TEMPERATURE,
     METRIC_INSIDE_BME280_HUMIDITY,
     METRIC_INSIDE_BME280_PRESSURE,

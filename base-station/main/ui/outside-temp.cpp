@@ -113,12 +113,11 @@ void OutsideTemp::init(lv::ObjectView parent)
                     .pad_left(20)
                     .margin_top(-6)
                     .text_color(COL_TEXT_PRIMARY)
-                    .text_font(FONT_36PT_BOLD);
+                    .text_font(FONT_48PT_BOLD);
 
     lv::Label::create(rbox)
         .text("Humidity")
         .border_color(COL_BACKGROUND_2)
-        .border_width(6)
         .text_color(COL_TEXT_SECONDARY)
         .text_font(FONT_24PT_BOLD);
 
@@ -128,12 +127,11 @@ void OutsideTemp::init(lv::ObjectView parent)
                     .margin_top(-6)
                     .pad_left(20)
                     .text_color(COL_TEXT_PRIMARY)
-                    .text_font(FONT_36PT_BOLD);
+                    .text_font(FONT_48PT_BOLD);
 
     lv::Label::create(rbox)
         .text("Pressure")
         .border_color(COL_BACKGROUND_2)
-        .border_width(6)
         .text_color(COL_TEXT_SECONDARY)
         .text_font(FONT_24PT_BOLD);
 
@@ -142,7 +140,7 @@ void OutsideTemp::init(lv::ObjectView parent)
                     .text_color(COL_TEXT_PRIMARY)
                     .margin_top(-6)
                     .pad_left(20)
-                    .text_font(FONT_36PT_BOLD)
+                    .text_font(FONT_48PT_BOLD)
                     .bg_color(COL_BACKGROUND_2);
 
     edt_add_system_event_handler(SYSTEM_EVENT_FORECAST, [this](system_event_t m)
