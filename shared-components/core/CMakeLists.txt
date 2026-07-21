@@ -1,4 +1,5 @@
 idf_component_register(SRCS 
+                           "core/src/adc.c" 
                            "core/src/radio.c" 
                            "core/src/espio.c" 
                            "core/src/cutils.c" 

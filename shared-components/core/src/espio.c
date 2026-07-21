@@ -1,7 +1,7 @@
 #include "models.h"
 #include "espio.h"
 
-esp_err_t configure_output_pin(int pin)
+esp_err_t configure_output_pin(gpio_num_t pin)
 {
     gpio_config_t io_conf = {};
 
@@ -14,7 +14,7 @@ esp_err_t configure_output_pin(int pin)
     return gpio_config(&io_conf);
 }
 
-esp_err_t configure_input_pin(int pin, gpio_int_type_t interruptType)
+esp_err_t configure_input_pin(gpio_num_t pin, gpio_int_type_t interruptType)
 {
     gpio_config_t io_conf = {};
 
@@ -25,4 +25,13 @@ esp_err_t configure_input_pin(int pin, gpio_int_type_t interruptType)
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
 
     return gpio_config(&io_conf);
+}
+
+esp_err_t disable_pin(gpio_num_t pin)
+{
+    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_DISABLE);
+    gpio_pulldown_dis(GPIO_NUM_4);
+    gpio_pullup_dis(GPIO_NUM_4);
+
+    return ESP_OK;
 }

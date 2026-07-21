@@ -73,6 +73,8 @@ private:
     void sync_1_hour_interval(time_t now);
     void sync_1_day_interval(time_t now);
 
+    void sync_90_day_hl();
+
     void clear_24_hr_hl();
 
     int find_head(timeseries_data_t *ts, int interval_count);
